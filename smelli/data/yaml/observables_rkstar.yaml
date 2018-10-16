@@ -1,0 +1,6 @@
+- name: <Rmue>(B0->K*ll)
+  q2min: 0.045
+  q2max: 1.1
+- name: <Rmue>(B0->K*ll)
+  q2min: 1.1
+  q2max: 6.0

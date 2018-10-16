@@ -1,0 +1,5 @@
+observables: !include_merge_list
+  # b->qll'
+  - observables_blfv.yaml
+  # LFV
+  - observables_lfv.yaml

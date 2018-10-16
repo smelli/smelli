@@ -1,0 +1,12 @@
+- name: <FL>(B0->K*mumu)
+  q2min: 0
+  q2max: 2
+- name: <FL>(B0->K*mumu)
+  q2min: 2
+  q2max: 4.3
+- name: <AFB>(B0->K*mumu)
+  q2min: 0
+  q2max: 2
+- name: <AFB>(B0->K*mumu)
+  q2min: 2
+  q2max: 4.3

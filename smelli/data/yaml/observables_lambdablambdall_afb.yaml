@@ -1,0 +1,9 @@
+- name: <AFBh>(Lambdab->Lambdamumu)
+  q2min: 15
+  q2max: 20
+- name: <AFBl>(Lambdab->Lambdamumu)
+  q2min: 15
+  q2max: 20
+- name: <AFBlh>(Lambdab->Lambdamumu)
+  q2min: 15
+  q2max: 20

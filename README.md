@@ -1,0 +1,1 @@
+<a href="https://travis-ci.org/smelli/smelli">![Build Status](https://travis-ci.org/smelli/smelli.svg?branch=master)</a> [![Coverage Status](https://coveralls.io/repos/github/smelli/smelli/badge.svg)](https://coveralls.io/github/smelli/smelli)

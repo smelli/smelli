@@ -1,0 +1,5 @@
+observables: !include_merge_list
+  # RD
+  - observables_rd.yaml
+  # RD*
+  - observables_rds.yaml

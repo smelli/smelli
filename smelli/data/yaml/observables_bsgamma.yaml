@@ -1,0 +1,14 @@
+- BR(B+->K*gamma)
+- BR(B0->K*gamma)
+- BR(B->Xsgamma)
+- ACP(B->Xgamma)
+# - ACP(B0->K*gamma)
+- BR(Bs->phigamma)
+# - ADeltaGamma(Bs->phigamma)
+- S_K*gamma
+- name: <ATIm>(B0->K*ee)
+  q2min: 0.002
+  q2max: 1.12
+- name: <P1>(B0->K*ee)
+  q2min: 0.002
+  q2max: 1.12

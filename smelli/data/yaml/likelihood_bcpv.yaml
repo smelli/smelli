@@ -1,0 +1,3 @@
+observables: !include_merge_list
+  # B->K*ll CP asymmetries
+  - observables_bkstarmumu_lhcb_a.yaml

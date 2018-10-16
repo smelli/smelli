@@ -1,0 +1,3 @@
+observables: !include_merge_list
+  # Z->ll'
+  - observables_zlfv.yaml
