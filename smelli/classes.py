@@ -154,7 +154,7 @@ class GlobalLikelihood(object):
         Wilson coefficient values (with keys corresponding to WCxf Wilson
         coefficient names) and the input scale."""
         w = self.get_wilson(wc_dict, scale)
-        return LikelihoodResult(self, w)
+        return GlobalLikelihoodPoint(self, w)
 
     @dispatch(str)
     def parameter_point(self, filename):
@@ -163,16 +163,16 @@ class GlobalLikelihood(object):
         with open(filename, 'r') as f:
             wc = wcxf.WC.load(f)
         w = Wilson.from_wc(wc)
-        return LikelihoodResult(self, w)
+        return GlobalLikelihoodPoint(self, w)
 
     @dispatch(Wilson)
-    def parameter_point(self, s):
+    def parameter_point(self, w):
         """Choose a point in parameter space by providing an instance
         of `wilson.Wilson`."""
-        return LikelihoodResult(self, w)
+        return GlobalLikelihoodPoint(self, w)
 
 
-class LikelihoodResult(object):
+class GlobalLikelihoodPoint(object):
     """Class representing the properties of the likelihood function at a
     specific point in parameter space.
 
