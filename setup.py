@@ -19,8 +19,9 @@ setup(name='smelli',
       packages=find_packages(),
       package_data={
         'smelli': ['data/yaml/*.yaml',
-                           'data/cache/*.p',
-                           ]
+                   'data/cache/*.p',
+                   'data/test/*.yaml',
+                   ]
       },
       install_requires=['flavio>=1.0', 'pandas'],
       extras_require={

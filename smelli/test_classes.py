@@ -13,6 +13,21 @@ class TestGlobalLikelihood(unittest.TestCase):
         # check just that this does not give an error
         ll_np = gl.parameter_point({'lq1_2223': 1e-8}, 1000)
 
+    def test_dispatch(self):
+        wc_dict  = {'phiD': 1e-10, 'lq1_3323': 1e-7}
+        gl = GlobalLikelihood()
+        pp = []
+        pp.append(gl.parameter_point(wc_dict, 1e3))  # dict, int
+        pp.append(gl.parameter_point(wc_dict, 1.e3))  # dict, float
+        w = Wilson(wc_dict, 1e3, 'SMEFT', 'Warsaw')
+        pp.append(gl.parameter_point(w))  # dict, float
+        filename = get_datapath('smelli', 'data/test/wcxf.yaml')
+        pp.append(gl.parameter_point(filename))  #str
+        for i, p in enumerate(pp):
+            self.assertDictEqual(wc_dict, p.w.wc.dict,
+                                 msg="Failed for {}".format(i))
+
+
     def test_basis(self):
         gl = GlobalLikelihood(basis='Warsaw up')
         self.assertEqual(gl.basis, 'Warsaw up')
@@ -38,11 +53,11 @@ class TestGlobalLikelihood(unittest.TestCase):
         self.assertNotIn('likelihood_lfv.yaml', set(ll.keys()))
 
 
-class TestLikelihoodResult(unittest.TestCase):
+class TestGlobalLikelihoodPoint(unittest.TestCase):
 
     def test_obstable(self):
         gl = GlobalLikelihood()
         res = gl.parameter_point({'lq1_2223': 1e-8}, 91.1876)
-        self.assertIsInstance(res, LikelihoodResult)
+        self.assertIsInstance(res, GlobalLikelihoodPoint)
         df = res.obstable(min_pull=1)
         self.assertTrue(df['pull'].min() >= 1)

@@ -1,0 +1,6 @@
+eft: SMEFT
+basis: Warsaw
+scale: 1000
+values:
+  phiD: 1e-10
+  lq1_3323: 1e-7
