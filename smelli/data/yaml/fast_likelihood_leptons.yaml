@@ -2,5 +2,5 @@ name: Fast Likelihood Lepton Sector
 observables: !include_merge_list
   # tau->nuff and tau->Pnu
   - observables_taucc.yaml
-  # a_mu, a_tau
+  # a_l
   - observables_g-2.yaml
