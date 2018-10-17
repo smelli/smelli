@@ -294,8 +294,9 @@ class GlobalLikelihoodPoint(object):
         likelihood is *not* simply proportional to the sum of squared pulls
         due to correlations.
         """
-        info = self._obstable_restrict(min_pull=min_pull, sortkey='pull',
-                                       reverse=True)
+        info = self._obstable_tree
+        info = self._obstable_filter_sort(info, min_pull=min_pull,
+                                          sortkey='pull', reverse=True)
         # create DataFrame
         df = pd.DataFrame(info).T
         # remove inspire references, likelihood name, and observable name
@@ -305,9 +306,9 @@ class GlobalLikelihoodPoint(object):
         del(df['exp. PDF'])
         return df
 
-    def _obstable_restrict(self, min_pull=0, max_pull=np.inf, sortkey='name', reverse=False, subset=None, max_rows=None):
-        info = self._obstable_tree
-        # impose min_pull
+    @staticmethod
+    def _obstable_filter_sort(info, min_pull=0, max_pull=np.inf, sortkey='name', reverse=False, subset=None, max_rows=None):
+        # impose min_pull and max_pull
         info = {obs:row for obs,row in info.items()
                 if row['pull'] >= min_pull and row['pull'] <= max_pull}
         # get only subset:
