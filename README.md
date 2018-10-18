@@ -28,12 +28,15 @@ A brief user manual can be found in the paper cited below.
 
 ## Citation
 
-> "A Global Likelihood for Precision Constraints and Flavour Anomalies"
->
+If you use `smelli` in a scientific publication, please cite
+
 >  J. Aebischer, J. Kumar, P. Stangl, and D. M. Straub
+>
+> "A Global Likelihood for Precision Constraints and Flavour Anomalies"
 >
 >  [arXiv:1810.xxxxxx [hep-ph]](https://arxiv.org/abs/1810.xxxxxx)
 
+Please also cite the publications on [flavio](https://flav-io.github.io/) and [wilson](https://arxiv.org/abs/1804.05033), which are the pillars `smelli` is  built on.
 
 ## Bugs and feature requests
 
