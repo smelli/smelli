@@ -1,1 +1,68 @@
 <a href="https://travis-ci.org/smelli/smelli">![Build Status](https://travis-ci.org/smelli/smelli.svg?branch=master)</a> [![Coverage Status](https://coveralls.io/repos/github/smelli/smelli/badge.svg)](https://coveralls.io/github/smelli/smelli)
+
+# smelli – a global likelihood for precision constraints and flavour anomalies
+
+`smelli` is a Python package providing a global likelihood function in the
+space of dimension-six Wilson coefficients in the Standard Model Effective
+Field Theory (SMEFT). The likelihood includes contributions from
+quark and lepton flavour physics, electroweak precision tests, and other
+precision observables.
+
+The package is based on [flavio](https://github.com/flav-io/flavio) for the
+calculation of observables and statistical treatment and
+[wilson](https://github.com/wilson-eft/wilson) for the running, translation,
+and matching of Wilson coefficients.
+
+## Installation
+
+The package requires Python version 3.5 or above. It can be installed with
+
+```bash
+python3 -m pip install smelli --user
+```
+
+
+## Documentation
+
+A brief user manual can be found in the paper cited below.
+
+## Citation
+
+> "A Global Likelihood for Precision Constraints and Flavour Anomalies"
+>
+>  J. Aebischer, J. Kumar, P. Stangl, and D. M. Straub
+>
+>  [arXiv:1810.xxxxxx [hep-ph]](https://arxiv.org/abs/1810.xxxxxx)
+
+
+## Bugs and feature requests
+
+Please submit bugs and feature requests using
+[Github's issue system](https://github.com/smelli/smelli/issues).
+
+## Contributing
+
+The aim of the package is to provide a likelihood in the
+space of dimension-6 SMEFT Wilson coefficients using all
+relevant available experimental measurements. If you want
+to contribute additional observables, the easiest way is
+to implement the observable in [flavio](https://github.com/flav-io/flavio). Observables
+implemented there can be added to the likelihood simply
+by adding a corresponding entry in one of the
+[observable YAML files](https://github.com/smelli/smelli/tree/master/smelli/data/yaml).
+
+Alternatively, also observables computed in any other standalone Python package can be incorporated in principle as long as it adheres to the [WCxf standard](https://wcxf.github.io).
+If you want to follow this route, please open an [issue](https://github.com/smelli/smelli/issues) to start the discussion on how to integrate it.
+
+## Contributors
+
+In alphabetical order:
+
+- Jason Aebischer
+- Jacky Kumar
+- Peter Stangl
+- David M. Straub
+
+## License
+
+smelli is released under the MIT license.
