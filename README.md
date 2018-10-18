@@ -1,6 +1,6 @@
 <a href="https://travis-ci.org/smelli/smelli">![Build Status](https://travis-ci.org/smelli/smelli.svg?branch=master)</a> [![Coverage Status](https://coveralls.io/repos/github/smelli/smelli/badge.svg)](https://coveralls.io/github/smelli/smelli)
 
-# smelli – a global likelihood for precision constraints and flavour anomalies
+# smelli – a global likelihood for precision constraints
 
 `smelli` is a Python package providing a global likelihood function in the
 space of dimension-six Wilson coefficients in the Standard Model Effective
