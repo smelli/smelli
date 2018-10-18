@@ -148,6 +148,16 @@ class GlobalLikelihood(object):
             ll[name] = lh.log_likelihood(self.par_dict, w)
         return ll
 
+    @dispatch(dict)
+    def parameter_point(self, wc_dict, scale=None):
+        """Choose a point in parameter space by providing a dictionary of
+        Wilson coefficient values (with keys corresponding to WCxf Wilson
+        coefficient names) and the input scale."""
+        if not scale:
+            raise ValueError("You need to provide a scale")
+        w = self.get_wilson(wc_dict, scale)
+        return GlobalLikelihoodPoint(self, w)
+
     @dispatch(dict, (int, float))
     def parameter_point(self, wc_dict, scale):
         """Choose a point in parameter space by providing a dictionary of

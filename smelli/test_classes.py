@@ -18,6 +18,7 @@ class TestGlobalLikelihood(unittest.TestCase):
         gl = GlobalLikelihood()
         pp = []
         pp.append(gl.parameter_point(wc_dict, 1e3))  # dict, int
+        pp.append(gl.parameter_point(wc_dict, scale=1e3))  # dict, kwarg
         pp.append(gl.parameter_point(wc_dict, 1.e3))  # dict, float
         w = Wilson(wc_dict, 1e3, 'SMEFT', 'Warsaw')
         pp.append(gl.parameter_point(w))  # dict, float
@@ -26,7 +27,8 @@ class TestGlobalLikelihood(unittest.TestCase):
         for i, p in enumerate(pp):
             self.assertDictEqual(wc_dict, p.w.wc.dict,
                                  msg="Failed for {}".format(i))
-
+            self.assertEqual(1e3, p.w.wc.scale,
+                             msg="Failed for {}".format(i))
 
     def test_basis(self):
         gl = GlobalLikelihood(basis='Warsaw up')
