@@ -36,7 +36,7 @@ If you use `smelli` in a scientific publication, please cite
 >
 >  [arXiv:1810.07698 [hep-ph]](https://arxiv.org/abs/1810.07698)
 
-Please also cite the publications on [flavio](https://flav-io.github.io/) and [wilson](https://arxiv.org/abs/1804.05033), which are the pillars `smelli` is  built on.
+Please also cite the publications on [flavio](https://arxiv.org/abs/1810.08132) and [wilson](https://arxiv.org/abs/1804.05033), which are the pillars `smelli` is  built on.
 
 ## Bugs and feature requests
 
