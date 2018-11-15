@@ -312,7 +312,7 @@ class GlobalLikelihoodPoint(object):
                     ll = m.get_logprobability_single(obs, pred[obs])
                     # DeltaChi2 is -2*DeltaLogLikelihood
                     info[obs]['pull'] = pull(-2 * (ll - ll_central), dof=1)
-                    info[obs]['delta_ll'] = ll - ll_sm
+                    info[obs]['delta_ll'] = (ll - ll_sm)[0]
             for lh_name, lh in llh.likelihoods.items():
                 # loop over "normal" likelihoods
                 ml = lh.measurement_likelihood
@@ -324,11 +324,12 @@ class GlobalLikelihoodPoint(object):
                     p_comb = info[obs]['exp. PDF']
                     ll = p_comb.logpdf([pred[obs]])
                     info[obs]['pull'] = pull(-2 * (ll - ll_central), dof=1)
-                    info[obs]['delta_ll'] = ll - ll_sm
+                    info[obs]['delta_ll'] = (ll - ll_sm)[0]
             self._obstable_tree_cache = info
         return self._obstable_tree_cache
 
-    def obstable(self, min_pull=0):
+    def obstable(self, min_pull=0, sort_by='pull', min_val=None, max_val=None,
+                 ascending = None):
         r"""Return a pandas data frame with the central values and uncertainties
         as well as the pull for each observable.
 
@@ -337,28 +338,51 @@ class GlobalLikelihoodPoint(object):
         due to correlations.
         """
         info = self._obstable_tree
-        info = self._obstable_filter_sort(info, min_pull=min_pull,
-                                          sortkey='pull', reverse=True)
+        subset = None
+        if sort_by == 'pull':
+            if ascending is None:
+                ascending = False
+            if min_val is not None:
+                min_val = max(min_pull, min_val)
+            else:
+                min_val = min_pull
+        elif min_pull != 0:
+            subset = lambda row: row['pull'] >= min_pull
+        if ascending is None:
+            ascending = True
+        info = self._obstable_filter_sort(info, sortkey=sort_by, ascending=ascending,
+                                          min_val=min_val, max_val=max_val,
+                                          subset=subset)
         # create DataFrame
         df = pd.DataFrame(info).T
         # remove inspire references, likelihood name, and observable name
-        del(df['inspire'])
-        del(df['lh_name'])
-        del(df['name'])
-        del(df['exp. PDF'])
+        if len(df) >0:
+            del(df['inspire'])
+            del(df['lh_name'])
+            del(df['name'])
+            del(df['exp. PDF'])
+            del(df['theory_sm'])
+            del(df['ll_central'])
+            del(df['ll_sm'])
         return df
 
     @staticmethod
-    def _obstable_filter_sort(info, min_pull=0, max_pull=np.inf, sortkey='name', reverse=False, subset=None, max_rows=None):
-        # impose min_pull and max_pull
-        info = {obs:row for obs,row in info.items()
-                if row['pull'] >= min_pull and row['pull'] <= max_pull}
+    def _obstable_filter_sort(info, sortkey='name', ascending=True,
+                              min_val=None, max_val=None,
+                              subset=None, max_rows=None):
+        # impose min_val and max_val
+        if min_val is not None:
+            info = {obs:row for obs,row in info.items()
+                    if row[sortkey] >= min_val}
+        if max_val is not None:
+            info = {obs:row for obs,row in info.items()
+                    if row[sortkey] <= max_val}
         # get only subset:
         if subset is not None:
             info = {obs:row for obs,row in info.items() if subset(row)}
         # sort
         info = OrderedDict(sorted(info.items(), key=lambda x: x[1][sortkey],
-                                  reverse=reverse))
+                                  reverse=(not ascending)))
         # restrict number of rows per tabular to max_rows
         if max_rows is None or len(info)<=max_rows:
             return info
