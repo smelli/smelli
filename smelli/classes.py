@@ -11,6 +11,7 @@ from collections import OrderedDict
 from math import ceil
 from .util import tree, get_datapath
 from multipledispatch import dispatch
+from copy import copy
 import os
 
 
@@ -76,6 +77,7 @@ class GlobalLikelihood(object):
             warnings.warn("There was a problem loading the SM covariances. "
                           "Please recompute them with `make_measurement`.")
         self._log_likelihood_sm = None
+        self._obstable_sm = None
 
     def _load_likelihoods(self,
                           include_likelihoods=None,
@@ -135,6 +137,58 @@ class GlobalLikelihood(object):
             self._log_likelihood_sm = self._log_likelihood(flavio.WilsonCoefficients())
         return self._log_likelihood_sm
 
+    @property
+    def obstable_sm(self):
+        if self._obstable_sm is None:
+            info = tree()  # nested dict
+            for flh_name, flh in self.fast_likelihoods.items():
+                # loop over fast likelihoods: they only have a single "measurement"
+                m = flh.pseudo_measurement
+                ml = flh.full_measurement_likelihood
+                pred_sm = ml.get_predictions_par(self.par_dict,
+                                                flavio.WilsonCoefficients())
+                sm_cov = flh.sm_covariance.get(force=False)
+                _, exp_cov = flh.exp_covariance.get(force=False)
+                inspire_dict = self._get_inspire_dict(flh.observables, ml)
+                for i, obs in enumerate(flh.observables):
+                    info[obs]['lh_name'] = flh_name
+                    info[obs]['name'] = obs if isinstance(obs, str) else obs[0]
+                    info[obs]['theory_sm'] = pred_sm[obs]
+                    info[obs]['th. unc.'] = np.sqrt(sm_cov[i, i])
+                    info[obs]['experiment'] = m.get_central(obs)
+                    info[obs]['exp. unc.'] = np.sqrt(exp_cov[i, i])
+                    info[obs]['exp. PDF'] = NormalDistribution(m.get_central(obs), np.sqrt(exp_cov[i, i]))
+                    info[obs]['inspire'] = sorted(set(inspire_dict[obs]))
+                    info[obs]['ll_sm'] = m.get_logprobability_single(obs, pred_sm[obs])
+                    info[obs]['ll_central'] = m.get_logprobability_single(obs, m.get_central(obs))
+            for lh_name, lh in self.likelihoods.items():
+                # loop over "normal" likelihoods
+                ml = lh.measurement_likelihood
+                pred_sm = ml.get_predictions_par(self.par_dict,
+                                                flavio.WilsonCoefficients())
+                inspire_dict = self._get_inspire_dict(lh.observables, ml)
+                for i, obs in enumerate(lh.observables):
+                    obs_dict = flavio.Observable.argument_format(obs, 'dict')
+                    obs_name = obs_dict.pop('name')
+                    with warnings.catch_warnings():
+                        warnings.simplefilter("ignore")
+                        p_comb = flavio.combine_measurements(
+                            obs_name,
+                            include_measurements=ml.get_measurements,
+                            **obs_dict)
+                    info[obs]['experiment'] = p_comb.central_value
+                    info[obs]['exp. unc.'] = max(p_comb.error_left, p_comb.error_right)
+                    info[obs]['exp. PDF'] = p_comb
+                    info[obs]['inspire'] = sorted(set(inspire_dict[obs]))
+                    info[obs]['theory_sm'] = pred_sm[obs]
+                    info[obs]['th. unc.'] = 0
+                    info[obs]['lh_name'] = lh_name
+                    info[obs]['name'] = obs if isinstance(obs, str) else obs[0]
+                    info[obs]['ll_sm'] = p_comb.logpdf([pred_sm[obs]])
+                    info[obs]['ll_central'] = p_comb.logpdf([p_comb.central_value])
+            self._obstable_sm = info
+        return self._obstable_sm
+
     def get_wilson(self, wc_dict, scale):
         return Wilson(wc_dict, scale=scale, eft=self.eft, basis=self.basis)
 
@@ -181,6 +235,18 @@ class GlobalLikelihood(object):
         of `wilson.Wilson`."""
         return GlobalLikelihoodPoint(self, w)
 
+    @staticmethod
+    def _get_inspire_dict(observables, ml):
+        inspire_dict = {}
+        obs_set = set(observables)
+        for m_name in ml.get_measurements:
+            m_obj = flavio.Measurement[m_name]
+            for obs in set(m_obj.all_parameters) & obs_set:
+                if obs in inspire_dict:
+                    inspire_dict[obs].append(m_obj.inspire)
+                else:
+                    inspire_dict[obs]=[m_obj.inspire]
+        return inspire_dict
 
 class GlobalLikelihoodPoint(object):
     """Class representing the properties of the likelihood function at a
@@ -229,78 +295,36 @@ class GlobalLikelihoodPoint(object):
         the dictionary returned by `log_likelihood_dict`."""
         return self.log_likelihood_dict()['global']
 
-    @staticmethod
-    def _get_inspire_dict(observables, ml):
-        inspire_dict = {}
-        obs_set = set(observables)
-        for m_name in ml.get_measurements:
-            m_obj = flavio.Measurement[m_name]
-            for obs in set(m_obj.all_parameters) & obs_set:
-                if obs in inspire_dict:
-                    inspire_dict[obs].append(m_obj.inspire)
-                else:
-                    inspire_dict[obs]=[m_obj.inspire]
-        return inspire_dict
-
     @property
     def _obstable_tree(self):
         if not self._obstable_tree_cache:
-            info = tree()  # nested dict
-            pull_dof = 1
             llh = self.likelihood
+            info = copy(llh.obstable_sm)
             for flh_name, flh in llh.fast_likelihoods.items():
                 # loop over fast likelihoods: they only have a single "measurement"
                 m = flh.pseudo_measurement
                 ml = flh.full_measurement_likelihood
                 pred = ml.get_predictions_par(llh.par_dict, self.w)
-                pred_sm = ml.get_predictions_par(llh.par_dict, flavio.WilsonCoefficients())
-                sm_cov = flh.sm_covariance.get(force=False)
-                _, exp_cov = flh.exp_covariance.get(force=False)
-                inspire_dict = self._get_inspire_dict(flh.observables, ml)
                 for i, obs in enumerate(flh.observables):
-                    info[obs]['lh_name'] = flh_name
-                    info[obs]['name'] = obs if isinstance(obs, str) else obs[0]
                     info[obs]['theory'] = pred[obs]
-                    info[obs]['th. unc.'] = np.sqrt(sm_cov[i, i])
-                    info[obs]['experiment'] = m.get_central(obs)
-                    info[obs]['exp. unc.'] = np.sqrt(exp_cov[i, i])
-                    info[obs]['exp. PDF'] = NormalDistribution(m.get_central(obs), np.sqrt(exp_cov[i, i]))
-                    info[obs]['inspire'] = sorted(set(inspire_dict[obs]))
-                    ll_central = m.get_logprobability_single(obs, m.get_central(obs))
+                    ll_central = info[obs]['ll_central']
+                    ll_sm = info[obs]['ll_sm']
                     ll = m.get_logprobability_single(obs, pred[obs])
                     # DeltaChi2 is -2*DeltaLogLikelihood
-                    info[obs]['pull'] = pull(-2 * (ll - ll_central), dof=pull_dof)
-                    ll_sm = m.get_logprobability_single(obs, pred_sm[obs])
-                    s = 1 if ll > ll_sm else -1
-                    info[obs]['delta pull'] = -s * pull(-2 * (ll - ll_sm), dof=pull_dof)
+                    info[obs]['pull'] = pull(-2 * (ll - ll_central), dof=1)
+                    info[obs]['delta_ll'] = ll - ll_sm
             for lh_name, lh in llh.likelihoods.items():
                 # loop over "normal" likelihoods
                 ml = lh.measurement_likelihood
                 pred = ml.get_predictions_par(llh.par_dict, self.w)
-                pred_sm = ml.get_predictions_par(llh.par_dict, flavio.WilsonCoefficients())
-                inspire_dict = self._get_inspire_dict(lh.observables, ml)
                 for i, obs in enumerate(lh.observables):
-                    obs_dict = flavio.Observable.argument_format(obs, 'dict')
-                    obs_name = obs_dict.pop('name')
-                    with warnings.catch_warnings():
-                        warnings.simplefilter("ignore")
-                        p_comb = flavio.combine_measurements(
-                            obs_name,
-                            include_measurements=ml.get_measurements,
-                            **obs_dict)
-                    info[obs]['experiment'] = p_comb.central_value
-                    info[obs]['exp. unc.'] = max(p_comb.error_left, p_comb.error_right)
-                    info[obs]['exp. PDF'] = p_comb
-                    info[obs]['inspire'] = sorted(set(inspire_dict[obs]))
                     info[obs]['theory'] = pred[obs]
-                    info[obs]['th. unc.'] = 0
-                    info[obs]['lh_name'] = lh_name
-                    info[obs]['name'] = obs if isinstance(obs, str) else obs[0]
-                    ll = p_comb.logpdf([pred[obs]]) - p_comb.logpdf([p_comb.central_value])
-                    info[obs]['pull'] = pull(-2 * ll, dof=pull_dof)
-                    delta_ll = p_comb.logpdf([pred[obs]]) - p_comb.logpdf([pred_sm[obs]])
-                    s = 1 if delta_ll > 0 else -1  # sign of delta_ll
-                    info[obs]['delta pull'] = -s * pull(-2 * abs(delta_ll), dof=pull_dof)
+                    ll_central = info[obs]['ll_central']
+                    ll_sm = info[obs]['ll_sm']
+                    p_comb = info[obs]['exp. PDF']
+                    ll = p_comb.logpdf([pred[obs]])
+                    info[obs]['pull'] = pull(-2 * (ll - ll_central), dof=1)
+                    info[obs]['delta_ll'] = ll - ll_sm
             self._obstable_tree_cache = info
         return self._obstable_tree_cache
 
