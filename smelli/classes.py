@@ -253,6 +253,7 @@ class GlobalLikelihoodPoint(object):
                 m = flh.pseudo_measurement
                 ml = flh.full_measurement_likelihood
                 pred = ml.get_predictions_par(llh.par_dict, self.w)
+                pred_sm = ml.get_predictions_par(llh.par_dict, flavio.WilsonCoefficients())
                 sm_cov = flh.sm_covariance.get(force=False)
                 _, exp_cov = flh.exp_covariance.get(force=False)
                 inspire_dict = self._get_inspire_dict(flh.observables, ml)
@@ -269,10 +270,14 @@ class GlobalLikelihoodPoint(object):
                     ll = m.get_logprobability_single(obs, pred[obs])
                     # DeltaChi2 is -2*DeltaLogLikelihood
                     info[obs]['pull'] = pull(-2 * (ll - ll_central), dof=pull_dof)
+                    ll_sm = m.get_logprobability_single(obs, pred_sm[obs])
+                    s = 1 if ll > ll_sm else -1
+                    info[obs]['delta pull'] = -s * pull(-2 * (ll - ll_sm), dof=pull_dof)
             for lh_name, lh in llh.likelihoods.items():
                 # loop over "normal" likelihoods
                 ml = lh.measurement_likelihood
                 pred = ml.get_predictions_par(llh.par_dict, self.w)
+                pred_sm = ml.get_predictions_par(llh.par_dict, flavio.WilsonCoefficients())
                 inspire_dict = self._get_inspire_dict(lh.observables, ml)
                 for i, obs in enumerate(lh.observables):
                     obs_dict = flavio.Observable.argument_format(obs, 'dict')
@@ -293,6 +298,9 @@ class GlobalLikelihoodPoint(object):
                     info[obs]['name'] = obs if isinstance(obs, str) else obs[0]
                     ll = p_comb.logpdf([pred[obs]]) - p_comb.logpdf([p_comb.central_value])
                     info[obs]['pull'] = pull(-2 * ll, dof=pull_dof)
+                    delta_ll = p_comb.logpdf([pred[obs]]) - p_comb.logpdf([pred_sm[obs]])
+                    s = 1 if delta_ll > 0 else -1  # sign of delta_ll
+                    info[obs]['delta pull'] = -s * pull(-2 * abs(delta_ll), dof=pull_dof)
             self._obstable_tree_cache = info
         return self._obstable_tree_cache
 
