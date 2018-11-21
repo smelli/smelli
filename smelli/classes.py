@@ -338,6 +338,7 @@ class GlobalLikelihoodPoint(object):
         info = self._obstable_tree
         subset = None
         if sort_by == 'pull':
+            # if sorted by pull, use descending order as default
             if ascending is None:
                 ascending = False
             if min_val is not None:
@@ -346,6 +347,7 @@ class GlobalLikelihoodPoint(object):
                 min_val = min_pull
         elif min_pull != 0:
             subset = lambda row: row['pull'] >= min_pull
+        # if sorted not by pull, use ascending order as default
         if ascending is None:
             ascending = True
         info = self._obstable_filter_sort(info, sortkey=sort_by,
@@ -354,8 +356,11 @@ class GlobalLikelihoodPoint(object):
                                           subset=subset)
         # create DataFrame
         df = pd.DataFrame(info).T
-        # remove inspire references, likelihood name, and observable name
+        # if df has length 0 (e.g. if min_pull is very large) there are no
+        # columns that could be removed
         if len(df) >0:
+            # remove columns that are only used internal and should not be
+            # included in obstable
             del(df['inspire'])
             del(df['lh_name'])
             del(df['name'])
