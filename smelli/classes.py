@@ -327,7 +327,7 @@ class GlobalLikelihoodPoint(object):
         return self._obstable_tree_cache
 
     def obstable(self, min_pull=0, sort_by='pull', min_val=None, max_val=None,
-                 ascending = None):
+                 ascending=None):
         r"""Return a pandas data frame with the central values and uncertainties
         as well as the pull for each observable.
 
@@ -348,7 +348,8 @@ class GlobalLikelihoodPoint(object):
             subset = lambda row: row['pull'] >= min_pull
         if ascending is None:
             ascending = True
-        info = self._obstable_filter_sort(info, sortkey=sort_by, ascending=ascending,
+        info = self._obstable_filter_sort(info, sortkey=sort_by,
+                                          ascending=ascending,
                                           min_val=min_val, max_val=max_val,
                                           subset=subset)
         # create DataFrame
