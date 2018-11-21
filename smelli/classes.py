@@ -337,6 +337,14 @@ class GlobalLikelihoodPoint(object):
         likelihood is *not* simply proportional to the sum of squared pulls
         due to correlations.
         """
+        sort_keys = ['name', 'exp. unc.', 'experiment', 'pull SM', 'pull exp.',
+                     'th. unc.', 'theory']
+        if sort_by not in sort_keys:
+            raise ValueError(
+                "'{}' is not an allowed value for sort_by. Allowed values are "
+                "'{}', and '{}'.".format(sort_by, "', '".join(sort_keys[:-1]),
+                                         sort_keys[-1])
+            )
         info = self._obstable_tree
         subset = None
         if sort_by == 'pull exp.':
