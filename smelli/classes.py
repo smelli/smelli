@@ -153,7 +153,6 @@ class GlobalLikelihood(object):
                 for i, obs in enumerate(flh.observables):
                     info[obs]['lh_name'] = flh_name
                     info[obs]['name'] = obs if isinstance(obs, str) else obs[0]
-                    info[obs]['theory_sm'] = pred_sm[obs]
                     info[obs]['th. unc.'] = np.sqrt(sm_cov[i, i])
                     info[obs]['experiment'] = m.get_central(obs)
                     info[obs]['exp. unc.'] = np.sqrt(exp_cov[i, i])
@@ -180,7 +179,6 @@ class GlobalLikelihood(object):
                     info[obs]['exp. unc.'] = max(p_comb.error_left, p_comb.error_right)
                     info[obs]['exp. PDF'] = p_comb
                     info[obs]['inspire'] = sorted(set(inspire_dict[obs]))
-                    info[obs]['theory_sm'] = pred_sm[obs]
                     info[obs]['th. unc.'] = 0
                     info[obs]['lh_name'] = lh_name
                     info[obs]['name'] = obs if isinstance(obs, str) else obs[0]
@@ -361,7 +359,6 @@ class GlobalLikelihoodPoint(object):
             del(df['lh_name'])
             del(df['name'])
             del(df['exp. PDF'])
-            del(df['theory_sm'])
             del(df['ll_central'])
             del(df['ll_sm'])
         return df
