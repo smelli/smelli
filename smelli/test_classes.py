@@ -61,5 +61,5 @@ class TestGlobalLikelihoodPoint(unittest.TestCase):
         gl = GlobalLikelihood()
         res = gl.parameter_point({'lq1_2223': 1e-8}, 91.1876)
         self.assertIsInstance(res, GlobalLikelihoodPoint)
-        df = res.obstable(min_pull=1)
-        self.assertTrue(df['pull'].min() >= 1)
+        df = res.obstable(min_pull_exp=1)
+        self.assertTrue(df['pull exp.'].min() >= 1)

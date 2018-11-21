@@ -309,8 +309,9 @@ class GlobalLikelihoodPoint(object):
                     ll_sm = info[obs]['ll_sm']
                     ll = m.get_logprobability_single(obs, pred[obs])
                     # DeltaChi2 is -2*DeltaLogLikelihood
-                    info[obs]['pull'] = pull(-2 * (ll - ll_central), dof=1)
-                    info[obs]['delta_ll'] = (ll - ll_sm)[0]
+                    info[obs]['pull exp.'] = pull(-2 * (ll - ll_central), dof=1)
+                    s = -1 if ll > ll_sm else 1
+                    info[obs]['pull SM'] = s * pull(-2 * (ll - ll_sm), dof=1)
             for lh_name, lh in llh.likelihoods.items():
                 # loop over "normal" likelihoods
                 ml = lh.measurement_likelihood
@@ -321,15 +322,16 @@ class GlobalLikelihoodPoint(object):
                     ll_sm = info[obs]['ll_sm']
                     p_comb = info[obs]['exp. PDF']
                     ll = p_comb.logpdf([pred[obs]])
-                    info[obs]['pull'] = pull(-2 * (ll - ll_central), dof=1)
-                    info[obs]['delta_ll'] = (ll - ll_sm)[0]
+                    info[obs]['pull exp.'] = pull(-2 * (ll - ll_central), dof=1)
+                    s = -1 if ll > ll_sm else 1
+                    info[obs]['pull SM'] = s * pull(-2 * (ll - ll_sm), dof=1)
             self._obstable_tree_cache = info
         return self._obstable_tree_cache
 
-    def obstable(self, min_pull=0, sort_by='pull', min_val=None, max_val=None,
-                 ascending=None):
+    def obstable(self, min_pull_exp=0, sort_by='pull exp.', ascending=None,
+                 min_val=None, max_val=None):
         r"""Return a pandas data frame with the central values and uncertainties
-        as well as the pull for each observable.
+        as well as the pulls with respect to the experimental and the SM values for each observable.
 
         The pull is defined is $\sqrt(|-2\ln L|)$. Note that the global
         likelihood is *not* simply proportional to the sum of squared pulls
@@ -337,17 +339,17 @@ class GlobalLikelihoodPoint(object):
         """
         info = self._obstable_tree
         subset = None
-        if sort_by == 'pull':
-            # if sorted by pull, use descending order as default
+        if sort_by == 'pull exp.':
+            # if sorted by pull exp., use descending order as default
             if ascending is None:
                 ascending = False
             if min_val is not None:
-                min_val = max(min_pull, min_val)
+                min_val = max(min_pull_exp, min_val)
             else:
-                min_val = min_pull
-        elif min_pull != 0:
-            subset = lambda row: row['pull'] >= min_pull
-        # if sorted not by pull, use ascending order as default
+                min_val = min_pull_exp
+        elif min_pull_exp != 0:
+            subset = lambda row: row['pull exp.'] >= min_pull_exp
+        # if sorted not by pull exp., use ascending order as default
         if ascending is None:
             ascending = True
         info = self._obstable_filter_sort(info, sortkey=sort_by,
