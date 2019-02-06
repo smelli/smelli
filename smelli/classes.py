@@ -19,7 +19,6 @@ import os
 Wilson.set_default_option('smeft_accuracy', 'leadinglog')
 
 
-
 class GlobalLikelihood(object):
     """Class that provides a global likelihood in SMEFT Wilson
     coefficient space.
@@ -44,6 +43,23 @@ class GlobalLikelihood(object):
     """
 
     _default_bases = {'SMEFT': 'Warsaw', 'WET': 'flavio'}
+
+    _fast_likelihoods_yaml = [
+        'fast_likelihood_quarks.yaml',
+        'fast_likelihood_leptons.yaml'
+    ]
+
+    _likelihoods_yaml = [
+        'likelihood_ewpt.yaml',
+        'likelihood_lept.yaml',
+        'likelihood_rd_rds.yaml',
+        'likelihood_lfu_fccc.yaml',
+        'likelihood_lfu_fcnc.yaml',
+        'likelihood_bcpv.yaml',
+        'likelihood_bqnunu.yaml',
+        'likelihood_lfv.yaml',
+        'likelihood_zlfv.yaml',
+    ]
 
     def __init__(self, eft='SMEFT', basis=None, par_dict=None,
                  include_likelihoods=None,
@@ -85,26 +101,15 @@ class GlobalLikelihood(object):
         if include_likelihoods is not None and exclude_likelihoods is not None:
             raise ValueError("include_likelihoods and exclude_likelihoods "
                              "should not be specified simultaneously.")
-        for fn in ['fast_likelihood_quarks.yaml',
-                   'fast_likelihood_leptons.yaml']:
+        for fn in self._fast_likelihoods_yaml:
             if include_likelihoods is not None and fn not in include_likelihoods:
                 continue
             if exclude_likelihoods is not None and fn in exclude_likelihoods:
                 continue
-            with open(get_datapath('smelli',
-                                   'data/yaml/' + fn), 'r') as f:
+            with open(self._get_likelihood_path(fn), 'r') as f:
                 L = FastLikelihood.load(f)
             self.fast_likelihoods[fn] = L
-        for fn in ['likelihood_ewpt.yaml',
-                   'likelihood_lept.yaml',
-                   'likelihood_rd_rds.yaml',
-                   'likelihood_lfu_fccc.yaml',
-                   'likelihood_lfu_fcnc.yaml',
-                   'likelihood_bcpv.yaml',
-                   'likelihood_bqnunu.yaml',
-                   'likelihood_lfv.yaml',
-                   'likelihood_zlfv.yaml',
-                   ]:
+        for fn in self._likelihoods_yaml:
             if include_likelihoods is not None and fn not in include_likelihoods:
                 continue
             if exclude_likelihoods is not None and fn in exclude_likelihoods:
@@ -112,10 +117,29 @@ class GlobalLikelihood(object):
             if self.eft != 'SMEFT' and fn in ['likelihood_ewpt.yaml',
                                               'likelihood_zlfv.yaml',]:
                 continue
-            with open(get_datapath('smelli',
-                                   'data/yaml/' + fn), 'r') as f:
+            with open(self._get_likelihood_path(fn), 'r') as f:
                 L = Likelihood.load(f)
             self.likelihoods[fn] = L
+
+    def _get_likelihood_path(self, name):
+        """Return a path for the likelihood specified by `name`.
+        If a YAML file with that name is found in the package's data
+        directory, that is used. Otherwise, `name` is assumed to be a path.
+
+        Raises `FileNotFoundError` if path does not exists.
+        """
+        path = get_datapath('smelli', 'data/yaml/' + name)
+        if os.path.exists(path):
+            return path
+        path = get_datapath('smelli', 'data/yaml/' + name + '.yaml')
+        if os.path.exists(path):
+            return path
+        if os.path.exists(name):
+            return path
+        if os.path.exists(name + '.yaml'):
+            return path
+        else:
+            raise FileNotFoundError("Likelihood YAML file '{}' was not found".format(name))
 
     def make_measurement(self, *args, **kwargs):
         for name, flh in self.fast_likelihoods.items():
