@@ -39,6 +39,8 @@ class GlobalLikelihood(object):
     parameters/uncertainties have been made
     - `save_sm_covariances`, `load_sm_covariances`: Save the calculated SM
     covariances or load them from data files
+    - `save_exp_covariances`, `load_exp_covariances`: Save the calculated
+    experimental central values and covariances or load them from data files
 
     """
 
@@ -64,7 +66,8 @@ class GlobalLikelihood(object):
     def __init__(self, eft='SMEFT', basis=None, par_dict=None,
                  include_likelihoods=None,
                  exclude_likelihoods=None,
-                 Nexp=5000):
+                 Nexp=5000,
+                 exp_cov_folder=None):
         """Initialize the likelihood.
 
         Optionally, a dictionary of parameters can be passed as `par_dict`.
@@ -83,7 +86,6 @@ class GlobalLikelihood(object):
                                exclude_likelihoods=exclude_likelihoods)
         try:
             self.load_sm_covariances(get_datapath('smelli', 'data/cache'))
-            self.make_measurement(Nexp=Nexp)
         except FileNotFoundError:
             warnings.warn("The cached SM covariances were not found. "
                           "Please call `make_measurement` to compute them.")
@@ -92,6 +94,10 @@ class GlobalLikelihood(object):
         except:
             warnings.warn("There was a problem loading the SM covariances. "
                           "Please recompute them with `make_measurement`.")
+        if exp_cov_folder is not None:
+            self.load_exp_covariances(exp_cov_folder)
+        self.make_measurement(Nexp=Nexp)
+
         self._log_likelihood_sm = None
         self._obstable_sm = None
 
@@ -154,6 +160,16 @@ class GlobalLikelihood(object):
         for name, flh in self.fast_likelihoods.items():
             filename = os.path.join(folder, name + '.p')
             flh.sm_covariance.load(filename)
+
+    def save_exp_covariances(self, folder):
+        for name, flh in self.fast_likelihoods.items():
+            filename = os.path.join(folder, name + '.p')
+            flh.exp_covariance.save(filename)
+
+    def load_exp_covariances(self, folder):
+        for name, flh in self.fast_likelihoods.items():
+            filename = os.path.join(folder, name + '.p')
+            flh.exp_covariance.load(filename)
 
     @property
     def log_likelihood_sm(self):
