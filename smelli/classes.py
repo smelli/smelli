@@ -10,6 +10,7 @@ import numpy as np
 from collections import OrderedDict
 from math import ceil
 from .util import tree, get_datapath
+from . import ckm
 from multipledispatch import dispatch
 from copy import copy
 import os
@@ -74,8 +75,13 @@ class GlobalLikelihood(object):
 
         Optionally, a dictionary of parameters can be passed as `par_dict`.
         If not given (or not complete), flavio default parameter values will
-        be used.
-
+        be used. Note that the CKM elements in `par_dict` will be ignored as
+        the "true" CKM elements will be extracted for each parameter point
+        from the measurement of four input observables:
+        - `'RKpi(P+->munu)'`
+        - `'BR(B+->taunu)'`
+        - `'BR(B->Xcenu)'`
+        - `'DeltaM_d/DeltaM_s'`
 
         Parameters:
 
@@ -105,8 +111,9 @@ class GlobalLikelihood(object):
         self.basis = basis or self._default_bases[self.eft]
         par_dict = par_dict or {}  # initialize empty if not given
         # take missing parameters from flavio defaults
-        self.par_dict = flavio.default_parameters.get_central_all()
-        self.par_dict.update(par_dict)
+        self.par_dict_default = flavio.default_parameters.get_central_all()
+        self.par_dict_default.update(par_dict)
+        self._par_dict_sm = None
         self.likelihoods = {}
         self.fast_likelihoods = {}
         self._custom_likelihoods_dict = custom_likelihoods or {}
@@ -228,7 +235,7 @@ class GlobalLikelihood(object):
     @property
     def log_likelihood_sm(self):
         if self._log_likelihood_sm is None:
-            self._log_likelihood_sm = self._log_likelihood(flavio.WilsonCoefficients())
+            self._log_likelihood_sm = self._log_likelihood(self.par_dict_sm, flavio.WilsonCoefficients())
         return self._log_likelihood_sm
 
     def _check_sm_cov_loaded(self):
@@ -236,6 +243,24 @@ class GlobalLikelihood(object):
         if not self._sm_cov_loaded:
             raise ValueError("Please load or compute the SM covariances first"
                              " by calling `make_measurement`.")
+
+    def get_ckm_sm(self):
+        scheme = ckm.CKMSchemeRmuBtaunuBxlnuDeltaM()
+        Vus, Vcb, Vub, delta = scheme.ckm_np(w=None)
+        return {'Vus': Vus, 'Vcb': Vcb, 'Vub': Vub, 'delta': delta}
+
+    @property
+    def par_dict_sm(self):
+        """Return the dictionary of parameters where the four CKM parameters
+        `Vus`, `Vcb`, `Vub`, `delta` have been replaced by their
+        "true" values extracted assuming the SM.
+        They should be almost (but not exactly) equal to the default
+        flavio CKM parameters."""
+        if self._par_dict_sm is None:
+            par_dict_sm = self.par_dict_default.copy()
+            par_dict_sm.update(self.get_ckm_sm())
+            self._par_dict_sm = par_dict_sm
+        return self._par_dict_sm
 
     @property
     def obstable_sm(self):
@@ -245,9 +270,9 @@ class GlobalLikelihood(object):
             for flh_name, flh in self.fast_likelihoods.items():
                 # loop over fast likelihoods: they only have a single "measurement"
                 m = flh.pseudo_measurement
-                ml = flh.likelihood.measurement_likelihood
-                pred_sm = ml.get_predictions_par(self.par_dict,
-                                                flavio.WilsonCoefficients())
+                ml = flh.full_measurement_likelihood
+                pred_sm = ml.get_predictions_par(self.par_dict_sm,
+                                                 flavio.WilsonCoefficients())
                 sm_cov = flh.sm_covariance.get(force=False)
                 _, exp_cov = flh.exp_covariance.get(force=False)
                 inspire_dict = self._get_inspire_dict(flh.observables, ml)
@@ -264,8 +289,8 @@ class GlobalLikelihood(object):
             for lh_name, lh in self.likelihoods.items():
                 # loop over "normal" likelihoods
                 ml = lh.measurement_likelihood
-                pred_sm = ml.get_predictions_par(self.par_dict,
-                                                flavio.WilsonCoefficients())
+                pred_sm = ml.get_predictions_par(self.par_dict_sm,
+                                                 flavio.WilsonCoefficients())
                 inspire_dict = self._get_inspire_dict(lh.observables, ml)
                 for i, obs in enumerate(lh.observables):
                     obs_dict = flavio.Observable.argument_format(obs, 'dict')
@@ -291,16 +316,16 @@ class GlobalLikelihood(object):
     def get_wilson(self, wc_dict, scale):
         return Wilson(wc_dict, scale=scale, eft=self.eft, basis=self.basis)
 
-    def _log_likelihood(self, w):
+    def _log_likelihood(self, par_dict, w):
         """Return the log-likelihood as a dictionary for an instance of
         `wilson.Wilson`."""
         ll = {}
         for name, flh in self.fast_likelihoods.items():
-            ll[name] = flh.log_likelihood(self.par_dict, w, delta=True)
+            ll[name] = flh.log_likelihood(par_dict, w, delta=True)
         for name, lh in self.likelihoods.items():
-            ll[name] = lh.log_likelihood(self.par_dict, w, delta=True)
+            ll[name] = lh.log_likelihood(par_dict, w, delta=True)
         for name, clh in self.custom_likelihoods.items():
-            ll[name] = clh.log_likelihood(self.par_dict, w, delta=True)
+            ll[name] = clh.log_likelihood(par_dict, w, delta=True)
         return ll
 
     @dispatch(dict)
@@ -429,13 +454,51 @@ class GlobalLikelihoodPoint(object):
     def __init__(self, likelihood, w):
         self.likelihood = likelihood
         likelihood._check_sm_cov_loaded()
-        self.w = w
+        self.w_input = w
+        self._w = None
         self._obstable_tree_cache = None
         self._log_likelihood_dict = None
+        self._par_dict_np = None
+
+    @property
+    def w(self):
+        if self._w is None:
+            w = self.w_input
+            opt = w.get_option('parameters')
+            par = self.par_dict_np
+            for p in ['Vus', 'Vcb', 'Vub', 'delta']:
+                opt[p] = par[p]
+            w.set_option('parameters', opt)
+            self._w = w
+        return self._w
+
+    def get_ckm_np(self):
+        """return the values of the four "true" CKM parameters
+        `Vus`, `Vcb`, `Vub`, `delta`, extracted from the four input observables
+        for this parameter point in Wilson coefficient space."""
+        # the default 4-observable scheme
+        scheme = ckm.CKMSchemeRmuBtaunuBxlnuDeltaM()
+        try:
+            Vus, Vcb, Vub, delta = scheme.ckm_np(self.w_input)
+        except ValueError:
+            # this happens mostly when the formulas result in |cos(delta)| > 1
+            raise ValueError("The extraction of CKM elements failed. Too large NP effects?")
+        return {'Vus': Vus, 'Vcb': Vcb, 'Vub': Vub, 'delta': delta}
+
+    @property
+    def par_dict_np(self):
+        """Return the dictionary of parameters where the four CKM parameters
+        `Vus`, `Vcb`, `Vub`, `delta` have been replaced by their
+        "true" values as extracted from the four input observables."""
+        if self._par_dict_np is None:
+            par_dict_np = self.likelihood.par_dict_default.copy()
+            par_dict_np.update(self.get_ckm_np())
+            self._par_dict_np = par_dict_np
+        return self._par_dict_np
 
     def _delta_log_likelihood(self):
         """Compute the delta log likelihood for the individual likelihoods"""
-        ll = self.likelihood._log_likelihood(self.w)
+        ll = self.likelihood._log_likelihood(self.par_dict_np, self.w)
         for name in ll:
             ll[name] -= self.likelihood.log_likelihood_sm[name]
         ll['global'] = sum([v for k, v in ll.items() if 'custom_' not in k])
@@ -476,8 +539,8 @@ class GlobalLikelihoodPoint(object):
             for flh_name, flh in llh.fast_likelihoods.items():
                 # loop over fast likelihoods: they only have a single "measurement"
                 m = flh.pseudo_measurement
-                ml = flh.likelihood.measurement_likelihood
-                pred = ml.get_predictions_par(llh.par_dict, self.w)
+                ml = flh.full_measurement_likelihood
+                pred = ml.get_predictions_par(self.par_dict_np, self.w)
                 for i, obs in enumerate(flh.observables):
                     info[obs]['theory'] = pred[obs]
                     ll_central = info[obs]['ll_central']
@@ -490,7 +553,7 @@ class GlobalLikelihoodPoint(object):
             for lh_name, lh in llh.likelihoods.items():
                 # loop over "normal" likelihoods
                 ml = lh.measurement_likelihood
-                pred = ml.get_predictions_par(llh.par_dict, self.w)
+                pred = ml.get_predictions_par(self.par_dict_np, self.w)
                 for i, obs in enumerate(lh.observables):
                     info[obs]['theory'] = pred[obs]
                     ll_central = info[obs]['ll_central']
