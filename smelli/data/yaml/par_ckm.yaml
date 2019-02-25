@@ -1,0 +1,24 @@
+# The CKM parameters and their covariance have been determined with
+# the method `ckm_np(w=None)` of the default CKM scheme in `smelli.ckm`
+- parameters:
+  - Vus
+  - Vcb
+  - Vub
+  - delta
+  values:
+    distribution: multivariate_normal
+    central_value:
+      - 0.22538
+      - 0.042062
+      - 0.0041063
+      - 1.09932
+    standard_deviation:
+      - 0.00075283
+      - 0.00079233
+      - 0.00050472
+      - 0.06056
+    correlation:
+      [[ 1.0  ,  0.036,  0.006, -0.113],
+       [ 0.036,  1.0  ,  0.002,  0.009],
+       [ 0.006,  0.002,  1.0  , -0.1  ],
+       [-0.113,  0.009, -0.1  ,  1.0  ]]
