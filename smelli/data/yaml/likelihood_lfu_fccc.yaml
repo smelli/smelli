@@ -3,6 +3,6 @@ observables: !include_merge_list
   - observables_bctaunu_other.yaml
   - observables_bctaunu_diff.yaml
   # u->dlnu
-  - observables_udlnu.yaml
+  - observables_udlnu_lfu.yaml
   # K LFU
   - observables_klfu.yaml

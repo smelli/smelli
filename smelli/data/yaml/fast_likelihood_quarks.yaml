@@ -14,6 +14,8 @@ observables: !include_merge_list
   - observables_xsee.yaml
   # b->ulnu
   - observables_bulnu_lfu.yaml
+  # b->ulnu
+  - observables_udlnu.yaml
   # DF=2
   - observables_df2.yaml
   # K
