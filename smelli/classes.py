@@ -106,6 +106,7 @@ class GlobalLikelihood(object):
         self.fast_likelihoods = {}
         self._load_likelihoods(include_likelihoods=include_likelihoods,
                                exclude_likelihoods=exclude_likelihoods)
+        self._Nexp = Nexp
         if exp_cov_folder is not None:
             self.load_exp_covariances(exp_cov_folder)
         try:
@@ -113,7 +114,7 @@ class GlobalLikelihood(object):
                 self.load_sm_covariances(get_datapath('smelli', 'data/cache'))
             else:
                 self.load_sm_covariances(sm_cov_folder)
-            self.make_measurement(Nexp=Nexp)
+            self.make_measurement()
         except (KeyboardInterrupt, SystemExit):
             raise
         except:
@@ -169,6 +170,8 @@ class GlobalLikelihood(object):
             raise FileNotFoundError("Likelihood YAML file '{}' was not found".format(name))
 
     def make_measurement(self, *args, **kwargs):
+        if 'Nexp' not in kwargs:
+            kwargs['Nexp'] = self._Nexp
         for name, flh in self.fast_likelihoods.items():
             flh.make_measurement(*args, **kwargs)
 
