@@ -67,7 +67,8 @@ class GlobalLikelihood(object):
                  include_likelihoods=None,
                  exclude_likelihoods=None,
                  Nexp=5000,
-                 exp_cov_folder=None):
+                 exp_cov_folder=None,
+                 sm_cov_folder=None):
         """Initialize the likelihood.
 
         Optionally, a dictionary of parameters can be passed as `par_dict`.
@@ -91,6 +92,9 @@ class GlobalLikelihood(object):
         - exp_cov_folder: directory containing saved expererimental
           covariances. The data files have to be in the format exported by
           `save_exp_covariances`.
+        - sm_cov_folder: directory containing saved SM
+          covariances. The data files have to be in the format exported by
+          `save_sm_covariances`.
         """
         self.eft = eft
         self.basis = basis or self._default_bases[self.eft]
@@ -102,20 +106,19 @@ class GlobalLikelihood(object):
         self.fast_likelihoods = {}
         self._load_likelihoods(include_likelihoods=include_likelihoods,
                                exclude_likelihoods=exclude_likelihoods)
+        if exp_cov_folder is not None:
+            self.load_exp_covariances(exp_cov_folder)
         try:
-            self.load_sm_covariances(get_datapath('smelli', 'data/cache'))
-        except FileNotFoundError:
-            warnings.warn("The cached SM covariances were not found. "
-                          "Please call `make_measurement` to compute them.")
+            if sm_cov_folder is None:
+                self.load_sm_covariances(get_datapath('smelli', 'data/cache'))
+            else:
+                self.load_sm_covariances(sm_cov_folder)
+            self.make_measurement(Nexp=Nexp)
         except (KeyboardInterrupt, SystemExit):
             raise
         except:
             warnings.warn("There was a problem loading the SM covariances. "
                           "Please recompute them with `make_measurement`.")
-        if exp_cov_folder is not None:
-            self.load_exp_covariances(exp_cov_folder)
-        self.make_measurement(Nexp=Nexp)
-
         self._log_likelihood_sm = None
         self._obstable_sm = None
 
