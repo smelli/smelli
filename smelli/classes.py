@@ -67,12 +67,34 @@ class GlobalLikelihood(object):
                  include_likelihoods=None,
                  exclude_likelihoods=None,
                  Nexp=5000,
-                 exp_cov_folder=None):
+                 exp_cov_folder=None,
+                 sm_cov_folder=None):
         """Initialize the likelihood.
 
         Optionally, a dictionary of parameters can be passed as `par_dict`.
         If not given (or not complete), flavio default parameter values will
         be used.
+
+
+        Parameters:
+
+        - eft: a WCxf EFT, must be one of 'SMEFT' (default) or 'WET'.
+        - basis: a WCxf basis, defaults to 'Warsaw' for SMEFT and 'flavio'
+          for WET.
+        - include_likelihoods: a list of strings specifying the likelihoods
+          to be included (default: all of them). Note that this cannot be used
+          to add likelihoods.
+        - exclude_likelihoods: a list of strings specifying the likelihoods
+          to be excluded (default: none of them).
+        - Nexp: number of random evaluations of the experimental likelihood
+          used to extract the covariance matrix for "fast likelihood"
+          instances. Defaults to 5000.
+        - exp_cov_folder: directory containing saved expererimental
+          covariances. The data files have to be in the format exported by
+          `save_exp_covariances`.
+        - sm_cov_folder: directory containing saved SM
+          covariances. The data files have to be in the format exported by
+          `save_sm_covariances`.
         """
         self.eft = eft
         self.basis = basis or self._default_bases[self.eft]
@@ -84,20 +106,22 @@ class GlobalLikelihood(object):
         self.fast_likelihoods = {}
         self._load_likelihoods(include_likelihoods=include_likelihoods,
                                exclude_likelihoods=exclude_likelihoods)
+        self._Nexp = Nexp
+        if exp_cov_folder is not None:
+            self.load_exp_covariances(exp_cov_folder)
+        self._sm_cov_loaded = False
         try:
-            self.load_sm_covariances(get_datapath('smelli', 'data/cache'))
-        except FileNotFoundError:
-            warnings.warn("The cached SM covariances were not found. "
-                          "Please call `make_measurement` to compute them.")
+            if sm_cov_folder is None:
+                self.load_sm_covariances(get_datapath('smelli', 'data/cache'))
+            else:
+                self.load_sm_covariances(sm_cov_folder)
+            self._sm_cov_loaded = True
+            self.make_measurement()
         except (KeyboardInterrupt, SystemExit):
             raise
         except:
             warnings.warn("There was a problem loading the SM covariances. "
                           "Please recompute them with `make_measurement`.")
-        if exp_cov_folder is not None:
-            self.load_exp_covariances(exp_cov_folder)
-        self.make_measurement(Nexp=Nexp)
-
         self._log_likelihood_sm = None
         self._obstable_sm = None
 
@@ -148,6 +172,26 @@ class GlobalLikelihood(object):
             raise FileNotFoundError("Likelihood YAML file '{}' was not found".format(name))
 
     def make_measurement(self, *args, **kwargs):
+        """Initialize the likelihood by producing a pseudo-measurement containing both
+        experimental uncertainties as well as theory uncertainties stemming
+        from nuisance parameters.
+
+        Optional parameters:
+
+        - `N`: number of random computations for the SM covariance (computing
+          time is proportional to it; more means less random fluctuations.)
+        - `Nexp`: number of random computations for the experimental covariance.
+          This is much less expensive than the theory covariance, so a large
+          number can be afforded (default: 5000).
+        - `threads`: number of parallel threads for the SM
+          covariance computation. Defaults to 1 (no parallelization).
+        - `force`: if True, will recompute SM covariance even if it
+          already has been computed. Defaults to False.
+        - `force_exp`: if True, will recompute experimental central values and
+          covariance even if they have already been computed. Defaults to False.
+        """
+        if 'Nexp' not in kwargs:
+            kwargs['Nexp'] = self._Nexp
         for name, flh in self.fast_likelihoods.items():
             flh.make_measurement(*args, **kwargs)
 
@@ -177,8 +221,15 @@ class GlobalLikelihood(object):
             self._log_likelihood_sm = self._log_likelihood(flavio.WilsonCoefficients())
         return self._log_likelihood_sm
 
+    def _check_sm_cov_loaded(self):
+        """Check if the SM covariances have been computed or loaded."""
+        if not self._sm_cov_loaded:
+            raise ValueError("Please load or compute the SM covariances first"
+                             " by calling `make_measurement`.")
+
     @property
     def obstable_sm(self):
+        self._check_sm_cov_loaded()
         if self._obstable_sm is None:
             info = tree()  # nested dict
             for flh_name, flh in self.fast_likelihoods.items():
@@ -305,6 +356,7 @@ class GlobalLikelihoodPoint(object):
 
     def __init__(self, likelihood, w):
         self.likelihood = likelihood
+        likelihood._check_sm_cov_loaded()
         self.w = w
         self._obstable_tree_cache = None
         self._log_likelihood_dict = None
