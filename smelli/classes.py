@@ -73,6 +73,24 @@ class GlobalLikelihood(object):
         Optionally, a dictionary of parameters can be passed as `par_dict`.
         If not given (or not complete), flavio default parameter values will
         be used.
+
+
+        Parameters:
+
+        - eft: a WCxf EFT, must be one of 'SMEFT' (default) or 'WET'.
+        - basis: a WCxf basis, defaults to 'Warsaw' for SMEFT and 'flavio'
+          for WET.
+        - include_likelihoods: a list of strings specifying the likelihoods
+          to be included (default: all of them). Note that this cannot be used
+          to add likelihoods.
+        - exclude_likelihoods: a list of strings specifying the likelihoods
+          to be excluded (default: none of them).
+        - Nexp: number of random evaluations of the experimental likelihood
+          used to extract the covariance matrix for "fast likelihood"
+          instances. Defaults to 5000.
+        - exp_cov_folder: directory containing saved expererimental
+          covariances. The data files have to be in the format exported by
+          `save_exp_covariances`.
         """
         self.eft = eft
         self.basis = basis or self._default_bases[self.eft]
