@@ -109,11 +109,13 @@ class GlobalLikelihood(object):
         self._Nexp = Nexp
         if exp_cov_folder is not None:
             self.load_exp_covariances(exp_cov_folder)
+        self._sm_cov_loaded = False
         try:
             if sm_cov_folder is None:
                 self.load_sm_covariances(get_datapath('smelli', 'data/cache'))
             else:
                 self.load_sm_covariances(sm_cov_folder)
+            self._sm_cov_loaded = True
             self.make_measurement()
         except (KeyboardInterrupt, SystemExit):
             raise
@@ -201,8 +203,15 @@ class GlobalLikelihood(object):
             self._log_likelihood_sm = self._log_likelihood(flavio.WilsonCoefficients())
         return self._log_likelihood_sm
 
+    def _check_sm_cov_loaded(self):
+        """Check if the SM covariances have been computed or loaded."""
+        if not self._sm_cov_loaded:
+            raise ValueError("Please load or compute the SM covariances first"
+                             " by calling `make_measurement`.")
+
     @property
     def obstable_sm(self):
+        self._check_sm_cov_loaded()
         if self._obstable_sm is None:
             info = tree()  # nested dict
             for flh_name, flh in self.fast_likelihoods.items():
@@ -329,6 +338,7 @@ class GlobalLikelihoodPoint(object):
 
     def __init__(self, likelihood, w):
         self.likelihood = likelihood
+        likelihood._check_sm_cov_loaded()
         self.w = w
         self._obstable_tree_cache = None
         self._log_likelihood_dict = None
