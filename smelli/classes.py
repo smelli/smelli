@@ -172,6 +172,24 @@ class GlobalLikelihood(object):
             raise FileNotFoundError("Likelihood YAML file '{}' was not found".format(name))
 
     def make_measurement(self, *args, **kwargs):
+        """Initialize the likelihood by producing a pseudo-measurement containing both
+        experimental uncertainties as well as theory uncertainties stemming
+        from nuisance parameters.
+
+        Optional parameters:
+
+        - `N`: number of random computations for the SM covariance (computing
+          time is proportional to it; more means less random fluctuations.)
+        - `Nexp`: number of random computations for the experimental covariance.
+          This is much less expensive than the theory covariance, so a large
+          number can be afforded (default: 5000).
+        - `threads`: number of parallel threads for the SM
+          covariance computation. Defaults to 1 (no parallelization).
+        - `force`: if True, will recompute SM covariance even if it
+          already has been computed. Defaults to False.
+        - `force_exp`: if True, will recompute experimental central values and
+          covariance even if they have already been computed. Defaults to False.
+        """
         if 'Nexp' not in kwargs:
             kwargs['Nexp'] = self._Nexp
         for name, flh in self.fast_likelihoods.items():
