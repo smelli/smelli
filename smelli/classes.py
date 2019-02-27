@@ -165,9 +165,9 @@ class GlobalLikelihood(object):
         if os.path.exists(path):
             return path
         if os.path.exists(name):
-            return path
+            return name
         if os.path.exists(name + '.yaml'):
-            return path
+            return name + '.yaml'
         else:
             raise FileNotFoundError("Likelihood YAML file '{}' was not found".format(name))
 
