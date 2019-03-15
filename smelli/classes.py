@@ -235,7 +235,7 @@ class GlobalLikelihood(object):
             for flh_name, flh in self.fast_likelihoods.items():
                 # loop over fast likelihoods: they only have a single "measurement"
                 m = flh.pseudo_measurement
-                ml = flh.full_measurement_likelihood
+                ml = flh.likelihood.measurement_likelihood
                 pred_sm = ml.get_predictions_par(self.par_dict,
                                                 flavio.WilsonCoefficients())
                 sm_cov = flh.sm_covariance.get(force=False)
@@ -393,7 +393,7 @@ class GlobalLikelihoodPoint(object):
             for flh_name, flh in llh.fast_likelihoods.items():
                 # loop over fast likelihoods: they only have a single "measurement"
                 m = flh.pseudo_measurement
-                ml = flh.full_measurement_likelihood
+                ml = flh.likelihood.measurement_likelihood
                 pred = ml.get_predictions_par(llh.par_dict, self.w)
                 for i, obs in enumerate(flh.observables):
                     info[obs]['theory'] = pred[obs]
