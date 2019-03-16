@@ -4,11 +4,12 @@ import wcxf
 from flavio.statistics.likelihood import Likelihood, FastLikelihood
 from flavio.statistics.probability import NormalDistribution
 from flavio.statistics.functions import pull
+import warnings
 import pandas as pd
 import numpy as np
 from collections import OrderedDict
 from math import ceil
-from .util import tree, get_datapath, warnings
+from .util import tree, get_datapath
 from multipledispatch import dispatch
 from copy import copy
 import os
