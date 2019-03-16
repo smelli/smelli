@@ -68,7 +68,9 @@ class GlobalLikelihood(object):
                  exclude_likelihoods=None,
                  Nexp=5000,
                  exp_cov_folder=None,
-                 sm_cov_folder=None):
+                 sm_cov_folder=None,
+                 subset_likelihoods_yaml=[],
+                 subset_fast_likelihoods_yaml=[]):
         """Initialize the likelihood.
 
         Optionally, a dictionary of parameters can be passed as `par_dict`.
@@ -104,6 +106,10 @@ class GlobalLikelihood(object):
         self.par_dict.update(par_dict)
         self.likelihoods = {}
         self.fast_likelihoods = {}
+        self._subset_likelihoods_yaml = subset_likelihoods_yaml
+        self._subset_fast_likelihoods_yaml = subset_fast_likelihoods_yaml
+        self.subset_likelihoods = {}
+        self.subset_fast_likelihoods = {}
         self._load_likelihoods(include_likelihoods=include_likelihoods,
                                exclude_likelihoods=exclude_likelihoods)
         self._Nexp = Nexp
@@ -131,6 +137,7 @@ class GlobalLikelihood(object):
         if include_likelihoods is not None and exclude_likelihoods is not None:
             raise ValueError("include_likelihoods and exclude_likelihoods "
                              "should not be specified simultaneously.")
+        flh_names = []
         for fn in self._fast_likelihoods_yaml:
             if include_likelihoods is not None and fn not in include_likelihoods:
                 continue
@@ -139,6 +146,7 @@ class GlobalLikelihood(object):
             with open(self._get_likelihood_path(fn), 'r') as f:
                 L = FastLikelihood.load(f)
             self.fast_likelihoods[fn] = L
+            flh_names.append(L.name)
         for fn in self._likelihoods_yaml:
             if include_likelihoods is not None and fn not in include_likelihoods:
                 continue
@@ -150,6 +158,25 @@ class GlobalLikelihood(object):
             with open(self._get_likelihood_path(fn), 'r') as f:
                 L = Likelihood.load(f)
             self.likelihoods[fn] = L
+        for fn in self._subset_fast_likelihoods_yaml:
+            with open(self._get_likelihood_path(fn), 'r') as f:
+                L = FastLikelihood.load(f)
+            fn = os.path.basename(fn)
+            if (fn in self.likelihoods.keys()
+            or fn in self.fast_likelihoods.keys()):
+                raise Exception('"{}" is a preconfigured likelihood and not a valid filename in subset_fast_likelihoods_yaml.'.format(fn))
+            if L.name in flh_names:
+                raise Exception('"{}" is the name of a preconfigured fast likelihood and not a valid name for a subset_fast_likelihood.'.format(L.name))
+            self.subset_fast_likelihoods[fn] = L
+        for fn in self._subset_likelihoods_yaml:
+            with open(self._get_likelihood_path(fn), 'r') as f:
+                L = Likelihood.load(f)
+            fn = os.path.basename(fn)
+            if (fn in self.likelihoods.keys()
+            or fn in self.fast_likelihoods.keys()):
+                raise Exception('"{}" is a preconfigured likelihood and not a valid filename in subset_likelihoods_yaml.'.format(fn))
+            self.subset_likelihoods[fn] = L
+
 
     def _get_likelihood_path(self, name):
         """Return a path for the likelihood specified by `name`.
@@ -194,6 +221,8 @@ class GlobalLikelihood(object):
             kwargs['Nexp'] = self._Nexp
         for name, flh in self.fast_likelihoods.items():
             flh.make_measurement(*args, **kwargs)
+        for name, flh in self.subset_fast_likelihoods.items():
+            flh.make_measurement(*args, **kwargs)
 
     def save_sm_covariances(self, folder):
         for name, flh in self.fast_likelihoods.items():
@@ -204,6 +233,14 @@ class GlobalLikelihood(object):
         for name, flh in self.fast_likelihoods.items():
             filename = os.path.join(folder, name + '.p')
             flh.sm_covariance.load(filename)
+        for name_sub, flh_sub in self.subset_fast_likelihoods.items():
+            for name, flh in self.fast_likelihoods.items():
+                if not (set(flh_sub.observables)-set(flh.observables)):
+                    filename = os.path.join(folder, name + '.p')
+                    flh_sub.sm_covariance.load(filename)
+                    break
+            else:
+                warnings.warn("\n{} is not a subset of any implemented fast likelihood and requires computing the SM covariance matrix.".format(name_sub))
 
     def save_exp_covariances(self, folder):
         for name, flh in self.fast_likelihoods.items():
@@ -289,6 +326,10 @@ class GlobalLikelihood(object):
             ll[name] = flh.log_likelihood(self.par_dict, w)
         for name, lh in self.likelihoods.items():
             ll[name] = lh.log_likelihood(self.par_dict, w)
+        for name, flh in self.subset_fast_likelihoods.items():
+            ll[name] = flh.log_likelihood(self.par_dict, w)
+        for name, lh in self.subset_likelihoods.items():
+            ll[name] = lh.log_likelihood(self.par_dict, w)
         return ll
 
     @dispatch(dict)
@@ -364,9 +405,12 @@ class GlobalLikelihoodPoint(object):
     def _delta_log_likelihood(self):
         """Compute the delta log likelihood for the individual likelihoods"""
         ll = self.likelihood._log_likelihood(self.w)
+        subset_names = (
+            list(self.likelihood.subset_likelihoods.keys()) + list(self.likelihood.subset_fast_likelihoods.keys())
+        )
         for name in ll:
             ll[name] -= self.likelihood.log_likelihood_sm[name]
-        ll['global'] = sum(ll.values())
+        ll['global'] = sum([v for k,v in ll.items() if k not in subset_names])
         return ll
 
     def log_likelihood_dict(self):
