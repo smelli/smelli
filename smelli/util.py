@@ -2,6 +2,7 @@ import pkgutil
 import os
 import sys
 from collections import defaultdict
+import warnings
 
 
 def tree():
@@ -29,3 +30,9 @@ def get_datapath(package, resource):
     parts.insert(0, os.path.dirname(mod.__file__))
     resource_name = os.path.join(*parts)
     return resource_name
+
+def _custom_showwarning(message, category, filename, lineno, file=None, line=None):
+    msg = warnings.WarningMessage(message, category, filename, lineno, file, '')
+    warnings._showwarnmsg_impl(msg)
+
+warnings.showwarning = _custom_showwarning
