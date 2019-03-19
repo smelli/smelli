@@ -286,9 +286,9 @@ class GlobalLikelihood(object):
         `wilson.Wilson`."""
         ll = {}
         for name, flh in self.fast_likelihoods.items():
-            ll[name] = flh.log_likelihood(self.par_dict, w)
+            ll[name] = flh.log_likelihood(self.par_dict, w, delta=True)
         for name, lh in self.likelihoods.items():
-            ll[name] = lh.log_likelihood(self.par_dict, w)
+            ll[name] = lh.log_likelihood(self.par_dict, w, delta=True)
         return ll
 
     @dispatch(dict)
