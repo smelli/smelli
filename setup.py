@@ -23,7 +23,7 @@ setup(name='smelli',
                    'data/test/*.yaml',
                    ]
       },
-      install_requires=['flavio>=1.3.1', 'pandas', 'multipledispatch'],
+      install_requires=['flavio~=' + __flavio__version__, 'pandas', 'multipledispatch'],
       extras_require={
             'testing': ['nose'],
       },
