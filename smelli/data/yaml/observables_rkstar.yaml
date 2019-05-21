@@ -4,3 +4,15 @@
 - name: <Rmue>(B0->K*ll)
   q2min: 1.1
   q2max: 6.0
+- name: <Rmue>(B0->K*ll)
+  q2min: 0.1
+  q2max: 8.0
+- name: <Rmue>(B0->K*ll)
+  q2min: 15.0
+  q2max: 19.0
+- name: <Rmue>(B+->K*ll)
+  q2min: 0.1
+  q2max: 8.0
+- name: <Rmue>(B+->K*ll)
+  q2min: 15.0
+  q2max: 19.0
