@@ -16,5 +16,6 @@
 - BR(B0->etau,taue)
 - BR(B0->mutau,taumu)
 - BR(Bs->emu,mue)
+- BR(Bs->mutau,taumu)
 - BR(B0->piemu,mue)
 - BR(B+->piemu,mue)
