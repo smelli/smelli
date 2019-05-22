@@ -10,8 +10,8 @@ logging.basicConfig(level=logging.INFO)
 
 def main(argv):
     parser = argparse.ArgumentParser(description='Recompute and save the SM covariances to the working directory.')
-    parser.add_argument('-n', type=int, default=100,
-                        help='Number of evaluations (default 100)')
+    parser.add_argument('-n', type=int, default=5000,
+                        help='Number of evaluations (default 5000)')
     parser.add_argument('-t', type=int, default=1,
                         help='Number of threads (default 1)')
     parser.add_argument('-f', action='store_true',
