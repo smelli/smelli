@@ -3,7 +3,7 @@ from wilson import Wilson
 import wcxf
 from flavio.statistics.likelihood import Likelihood, FastLikelihood
 from flavio.statistics.probability import NormalDistribution
-from flavio.statistics.functions import pull
+from flavio.statistics.functions import pull, pvalue
 import warnings
 import pandas as pd
 import numpy as np
@@ -337,6 +337,20 @@ class GlobalLikelihood(object):
                     inspire_dict[obs]=[m_obj.inspire]
         return inspire_dict
 
+    def number_observations_dict(self, exclude_observables=None):
+        nobs_dict = {}
+        for name, flh in self.fast_likelihoods.items():
+            nobs_dict[name] = len(set(flh.observables) - set(exclude_observables or []))
+        for name, lh in self.likelihoods.items():
+            ml =  lh.measurement_likelihood
+            nobs_dict[name] = ml.get_number_observations(
+                exclude_observables=exclude_observables
+            )
+        nobs_dict['global'] = sum(nobs_dict.values())
+        return nobs_dict
+
+
+
 class GlobalLikelihoodPoint(object):
     """Class representing the properties of the likelihood function at a
     specific point in parameter space.
@@ -384,6 +398,13 @@ class GlobalLikelihoodPoint(object):
         Cached after the first call. Corresponds to the `global` key of
         the dictionary returned by `log_likelihood_dict`."""
         return self.log_likelihood_dict()['global']
+
+    def pvalue_dict(self):
+        nobs = self.likelihood.number_observations_dict()
+        ll = self.log_likelihood_dict()
+        llsm = self.likelihood._log_likelihood_sm
+        llsm['global'] = sum(llsm.values())
+        return {k: pvalue(-2 * (ll[k] + llsm[k]), nobs[k]) for k in nobs}
 
     @property
     def _obstable_tree(self):

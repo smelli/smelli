@@ -63,3 +63,9 @@ class TestGlobalLikelihoodPoint(unittest.TestCase):
         self.assertIsInstance(res, GlobalLikelihoodPoint)
         df = res.obstable(min_pull_exp=1)
         self.assertTrue(df['pull exp.'].min() >= 1)
+
+    def test_pvalue(self):
+        gl = GlobalLikelihood()
+        res = gl.parameter_point({}, 91.1876)
+        pval = res.pvalue_dict()
+        self.assertTrue(0 < pval['global'] < 1)
