@@ -68,7 +68,8 @@ class GlobalLikelihood(object):
                  exclude_likelihoods=None,
                  Nexp=5000,
                  exp_cov_folder=None,
-                 sm_cov_folder=None):
+                 sm_cov_folder=None,
+                 custom_likelihoods={}):
         """Initialize the likelihood.
 
         Optionally, a dictionary of parameters can be passed as `par_dict`.
@@ -104,6 +105,7 @@ class GlobalLikelihood(object):
         self.par_dict.update(par_dict)
         self.likelihoods = {}
         self.fast_likelihoods = {}
+        self._custom_likelihoods = custom_likelihoods
         self._load_likelihoods(include_likelihoods=include_likelihoods,
                                exclude_likelihoods=exclude_likelihoods)
         self._Nexp = Nexp
@@ -170,6 +172,19 @@ class GlobalLikelihood(object):
             return name + '.yaml'
         else:
             raise FileNotFoundError("Likelihood YAML file '{}' was not found".format(name))
+
+    def _add_custom_ll(self, lh, ll, w):
+        for k,v in self._custom_likelihoods.items():
+            exclude_observables = set(lh.observables) - set(v)
+            if set(lh.observables) != exclude_observables:
+                custom_name = 'custom_'+str(k)
+                if custom_name not in ll:
+                    ll[custom_name] = 0
+                ll[custom_name] += lh.log_likelihood(
+                    self.par_dict, w, delta=True,
+                    exclude_observables = exclude_observables
+                )
+        return ll
 
     def make_measurement(self, *args, **kwargs):
         """Initialize the likelihood by producing a pseudo-measurement containing both
@@ -287,8 +302,10 @@ class GlobalLikelihood(object):
         ll = {}
         for name, flh in self.fast_likelihoods.items():
             ll[name] = flh.log_likelihood(self.par_dict, w, delta=True)
+            ll = self._add_custom_ll(flh, ll, w)
         for name, lh in self.likelihoods.items():
             ll[name] = lh.log_likelihood(self.par_dict, w, delta=True)
+            ll = self._add_custom_ll(lh, ll, w)
         return ll
 
     @dispatch(dict)
@@ -380,7 +397,7 @@ class GlobalLikelihoodPoint(object):
         ll = self.likelihood._log_likelihood(self.w)
         for name in ll:
             ll[name] -= self.likelihood.log_likelihood_sm[name]
-        ll['global'] = sum(ll.values())
+        ll['global'] = sum((v for k,v in ll.items() if 'custom_' not in k))
         return ll
 
     def log_likelihood_dict(self):
