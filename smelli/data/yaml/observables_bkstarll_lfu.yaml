@@ -1,0 +1,12 @@
+- name: <Dmue_P4p>(B0->K*ll)
+  q2min: 1.0
+  q2max: 6.0
+- name: <Dmue_P4p>(B0->K*ll)
+  q2min: 14.18
+  q2max: 19.0
+- name: <Dmue_P5p>(B0->K*ll)
+  q2min: 1.0
+  q2max: 6.0
+- name: <Dmue_P5p>(B0->K*ll)
+  q2min: 14.18
+  q2max: 19.0

@@ -68,7 +68,8 @@ class GlobalLikelihood(object):
                  exclude_likelihoods=None,
                  Nexp=5000,
                  exp_cov_folder=None,
-                 sm_cov_folder=None):
+                 sm_cov_folder=None,
+                 custom_likelihoods=None):
         """Initialize the likelihood.
 
         Optionally, a dictionary of parameters can be passed as `par_dict`.
@@ -104,6 +105,8 @@ class GlobalLikelihood(object):
         self.par_dict.update(par_dict)
         self.likelihoods = {}
         self.fast_likelihoods = {}
+        self._custom_likelihoods_dict = custom_likelihoods or {}
+        self.custom_likelihoods = {}
         self._load_likelihoods(include_likelihoods=include_likelihoods,
                                exclude_likelihoods=exclude_likelihoods)
         self._Nexp = Nexp
@@ -150,6 +153,9 @@ class GlobalLikelihood(object):
             with open(self._get_likelihood_path(fn), 'r') as f:
                 L = Likelihood.load(f)
             self.likelihoods[fn] = L
+        for name, observables in self._custom_likelihoods_dict.items():
+            L = CustomLikelihood(self, name, observables)
+            self.custom_likelihoods['custom_' + name] = L
 
     def _get_likelihood_path(self, name):
         """Return a path for the likelihood specified by `name`.
@@ -289,6 +295,8 @@ class GlobalLikelihood(object):
             ll[name] = flh.log_likelihood(self.par_dict, w, delta=True)
         for name, lh in self.likelihoods.items():
             ll[name] = lh.log_likelihood(self.par_dict, w, delta=True)
+        for name, clh in self.custom_likelihoods.items():
+            ll[name] = clh.log_likelihood(self.par_dict, w, delta=True)
         return ll
 
     @dispatch(dict)
@@ -346,9 +354,58 @@ class GlobalLikelihood(object):
             nobs_dict[name] = ml.get_number_observations(
                 exclude_observables=exclude_observables
             )
-        nobs_dict['global'] = sum(nobs_dict.values())
+        for name, clh in self.custom_likelihoods.items():
+            nobs_dict[name] = clh.get_number_observations()
+        nobs_dict['global'] = sum([v for k, v in nobs_dict.items() if 'custom_' not in k])
         return nobs_dict
 
+
+class CustomLikelihood(object):
+    def __init__(self, likelihood, name, observables):
+        self.likelihood = likelihood
+        self.name = name
+        self.observables = observables
+        self.exclude_obs = self.get_exclude_obs_dict()
+
+    def get_exclude_obs_dict(self):
+        """Get a dictionary with observables to be excluded from each
+        (Fast)Likelihood instance."""
+        exclude_obs = {}
+        for name, flh in self.likelihood.fast_likelihoods.items():
+            exclude_observables = set(flh.observables) - set(self.observables)
+            if set(flh.observables) != exclude_observables:
+                exclude_obs[name] = exclude_observables
+        for name, lh in self.likelihood.likelihoods.items():
+            exclude_observables = set(lh.observables) - set(self.observables)
+            if set(lh.observables) != exclude_observables:
+                exclude_obs[name] = exclude_observables
+        return exclude_obs
+
+    def log_likelihood(self, par_dict, wc_obj, delta=False):
+         custom_log_likelihood = 0
+         for llh_name, exclude_observables in self.exclude_obs.items():
+             llh = (self.likelihood.fast_likelihoods.get(llh_name)
+                    or self.likelihood.likelihoods.get(llh_name))
+             custom_log_likelihood += llh.log_likelihood(
+                 self.likelihood.par_dict, wc_obj, delta=delta,
+                 exclude_observables=exclude_observables
+             )
+         return custom_log_likelihood
+
+    def get_number_observations(self):
+        """Get the number of observations, defined as individual measurements
+        of observables."""
+        nobs = 0
+        for llh_name, exclude_observables in self.exclude_obs.items():
+            if llh_name in self.likelihood.fast_likelihoods:
+                flh = self.likelihood.fast_likelihoods[llh_name]
+                nobs += len(set(flh.observables) - set(exclude_observables or []))
+            else:
+                lh = self.likelihood.likelihoods[llh_name]
+                ml =  lh.measurement_likelihood
+                nobs += ml.get_number_observations(
+                    exclude_observables=exclude_observables)
+        return nobs
 
 
 class GlobalLikelihoodPoint(object):
@@ -380,7 +437,7 @@ class GlobalLikelihoodPoint(object):
         ll = self.likelihood._log_likelihood(self.w)
         for name in ll:
             ll[name] -= self.likelihood.log_likelihood_sm[name]
-        ll['global'] = sum(ll.values())
+        ll['global'] = sum([v for k, v in ll.items() if 'custom_' not in k])
         return ll
 
     def log_likelihood_dict(self):
