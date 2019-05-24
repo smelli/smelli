@@ -2,5 +2,6 @@ observables: !include_merge_list
   # b->sll
   - observables_rkstar.yaml
   - observables_rk.yaml
+  - observables_bkstarll_lfu.yaml
   # b->qtautau
   - observables_bqtautau.yaml
