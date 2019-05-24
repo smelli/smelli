@@ -458,10 +458,14 @@ class GlobalLikelihoodPoint(object):
 
     def pvalue_dict(self):
         nobs = self.likelihood.number_observations_dict()
+        chi2 = self.chi2_dict()
+        return {k: pvalue(chi2[k], nobs[k]) for k in chi2}
+
+    def chi2_dict(self):
         ll = self.log_likelihood_dict()
-        llsm = self.likelihood._log_likelihood_sm
-        llsm['global'] = sum(llsm.values())
-        return {k: pvalue(-2 * (ll[k] + llsm[k]), nobs[k]) for k in nobs}
+        llsm = self.likelihood._log_likelihood_sm.copy()
+        llsm['global'] = sum([v for k, v in llsm.items() if 'custom_' not in k])
+        return {k: -2 * (ll[k] + llsm[k]) for k in ll}
 
     @property
     def _obstable_tree(self):
