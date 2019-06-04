@@ -96,6 +96,10 @@ class GlobalLikelihood(object):
         - sm_cov_folder: directory containing saved SM
           covariances. The data files have to be in the format exported by
           `save_sm_covariances`.
+        - custom_likelihoods: a dictionary in which each value is a list of
+          observables and each key is a string that serves as user-defined
+          name. For each item of the dictionary, a custom likelihood will be
+          computed.
         """
         self.eft = eft
         self.basis = basis or self._default_bases[self.eft]
