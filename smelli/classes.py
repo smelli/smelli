@@ -61,6 +61,7 @@ class GlobalLikelihood(object):
         'likelihood_bqnunu.yaml',
         'likelihood_lfv.yaml',
         'likelihood_zlfv.yaml',
+        'likelihood_higgs.yaml',
     ]
 
     def __init__(self, eft='SMEFT', basis=None,
@@ -181,7 +182,8 @@ class GlobalLikelihood(object):
             if exclude_likelihoods is not None and fn in exclude_likelihoods:
                 continue
             if self.eft != 'SMEFT' and fn in ['likelihood_ewpt.yaml',
-                                              'likelihood_zlfv.yaml',]:
+                                              'likelihood_zlfv.yaml',
+                                              'likelihood_higgs.yaml',]:
                 continue
             with open(self._get_yaml_path(fn), 'r') as f:
                 L = Likelihood.load(f)
