@@ -158,7 +158,7 @@ class GlobalLikelihood(object):
                 L = Likelihood.load(f)
             self.likelihoods[fn] = L
         for name, observables in self._custom_likelihoods_dict.items():
-            L = CustomLikelihood(self, name, observables)
+            L = CustomLikelihood(self, observables)
             self.custom_likelihoods['custom_' + name] = L
 
     def _get_likelihood_path(self, name):
@@ -365,36 +365,33 @@ class GlobalLikelihood(object):
 
 
 class CustomLikelihood(object):
-    def __init__(self, likelihood, name, observables):
+    def __init__(self, likelihood, observables):
         self.likelihood = likelihood
-        self.name = name
         self.observables = observables
-        self.exclude_obs = self.get_exclude_obs_dict()
+        self.exclude_obs = self._get_exclude_obs_dict()
 
-    def get_exclude_obs_dict(self):
+    def _get_exclude_obs_dict(self):
         """Get a dictionary with observables to be excluded from each
         (Fast)Likelihood instance."""
         exclude_obs = {}
-        for name, flh in self.likelihood.fast_likelihoods.items():
-            exclude_observables = set(flh.observables) - set(self.observables)
-            if set(flh.observables) != exclude_observables:
-                exclude_obs[name] = exclude_observables
-        for name, lh in self.likelihood.likelihoods.items():
-            exclude_observables = set(lh.observables) - set(self.observables)
-            if set(lh.observables) != exclude_observables:
-                exclude_obs[name] = exclude_observables
+        for lhs_or_flhs in (self.likelihood.likelihoods,
+                            self.likelihood.fast_likelihoods):
+            for lh_name, lh in lhs_or_flhs.items():
+                exclude_observables = set(lh.observables) - set(self.observables)
+                if set(lh.observables) != exclude_observables:
+                    exclude_obs[lh_name] = exclude_observables
         return exclude_obs
 
     def log_likelihood(self, par_dict, wc_obj, delta=False):
-         custom_log_likelihood = 0
-         for llh_name, exclude_observables in self.exclude_obs.items():
-             llh = (self.likelihood.fast_likelihoods.get(llh_name)
-                    or self.likelihood.likelihoods.get(llh_name))
-             custom_log_likelihood += llh.log_likelihood(
-                 self.likelihood.par_dict, wc_obj, delta=delta,
-                 exclude_observables=exclude_observables
-             )
-         return custom_log_likelihood
+        custom_log_likelihood = 0
+        for lh_name, exclude_observables in self.exclude_obs.items():
+            lh = (self.likelihood.fast_likelihoods.get(lh_name)
+                  or self.likelihood.likelihoods.get(lh_name))
+            custom_log_likelihood += lh.log_likelihood(
+                par_dict, wc_obj, delta=delta,
+                exclude_observables=exclude_observables
+            )
+        return custom_log_likelihood
 
     def get_number_observations(self):
         """Get the number of observations, defined as individual measurements
