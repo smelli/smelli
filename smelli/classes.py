@@ -64,7 +64,8 @@ class GlobalLikelihood(object):
         'likelihood_zlfv.yaml',
     ]
 
-    def __init__(self, eft='SMEFT', basis=None, par_dict=None,
+    def __init__(self, eft='SMEFT', basis=None,
+                 par_dict=None,
                  include_likelihoods=None,
                  exclude_likelihoods=None,
                  Nexp=5000,
@@ -106,7 +107,7 @@ class GlobalLikelihood(object):
           observables and each key is a string that serves as user-defined
           name. For each item of the dictionary, a custom likelihood will be
           computed.
-        """
+3        """
         self.eft = eft
         self.basis = basis or self._default_bases[self.eft]
         par_dict = par_dict or {}  # initialize empty if not given
@@ -451,10 +452,23 @@ class GlobalLikelihoodPoint(object):
     for each individual observable, given the Wilson coefficients
     """
 
-    def __init__(self, likelihood, w):
+    def __init__(self, likelihood, w,
+                 fix_ckm=False):
+        """Initialize the `GlobalLikelihoodPoint` instance.
+
+        Parameters:
+        - likelihood: an instance of `GlobalLikelihood`
+        - w: an instance of `wilson.Wilson`
+        - fix_ckm: If False (default), automatically determine the CKM elements
+          in the presence of new physics in processes used to determine these
+          elements in the SM. If set to True, the CKM elements are fixed to
+          their SM values, which can lead to inconsistent results, but also
+          to a significant speedup in specific cases.
+        """
         self.likelihood = likelihood
         likelihood._check_sm_cov_loaded()
         self.w_input = w
+        self.fix_ckm = fix_ckm
         self._w = None
         self._obstable_tree_cache = None
         self._log_likelihood_dict = None
@@ -489,7 +503,12 @@ class GlobalLikelihoodPoint(object):
     def par_dict_np(self):
         """Return the dictionary of parameters where the four CKM parameters
         `Vus`, `Vcb`, `Vub`, `delta` have been replaced by their
-        "true" values as extracted from the four input observables."""
+        "true" values as extracted from the four input observables.
+
+        Note that if `fix_ckm` is set to `True`, this method actually
+        returns the SM values."""
+        if self.fix_ckm:
+            return self.likelihood.par_dict_sm
         if self._par_dict_np is None:
             par_dict_np = self.likelihood.par_dict_default.copy()
             par_dict_np.update(self.get_ckm_np())

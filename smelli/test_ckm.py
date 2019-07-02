@@ -52,6 +52,9 @@ class TestSmelliCKM(unittest.TestCase):
         w = Wilson({'lq3_1123': 0.5 * pre * VcbSM * (-0.5)}, 91.1876, 'SMEFT', 'Warsaw')
         pp = gl.parameter_point(w)
         self.assertAlmostEqual(pp.par_dict_np['Vcb'] / VcbSM,  1.5, delta=0.03)
+        # with fix_ckm
+        pp = gl.parameter_point(w, fix_ckm=True)
+        self.assertEqual(pp.par_dict_np['Vcb'] / VcbSM,  1)
         # Vub
         w = Wilson({'lq3_3313': 0.5 * pre * VubSM * (-0.5) * exp(-1j * deltaSM)}, 91.1876, 'SMEFT', 'Warsaw')
         pp = gl.parameter_point(w)
