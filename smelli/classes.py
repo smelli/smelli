@@ -71,7 +71,8 @@ class GlobalLikelihood(object):
                  Nexp=5000,
                  exp_cov_folder=None,
                  sm_cov_folder=None,
-                 custom_likelihoods=None):
+                 custom_likelihoods=None,
+                 fix_ckm=False):
         """Initialize the likelihood.
 
         Optionally, a dictionary of parameters can be passed as `par_dict`.
@@ -107,7 +108,12 @@ class GlobalLikelihood(object):
           observables and each key is a string that serves as user-defined
           name. For each item of the dictionary, a custom likelihood will be
           computed.
-3        """
+        - fix_ckm: If False (default), automatically determine the CKM elements
+          in the presence of new physics in processes used to determine these
+          elements in the SM. If set to True, the CKM elements are fixed to
+          their SM values, which can lead to inconsistent results, but also
+          to a significant speedup in specific cases.
+        """
         self.eft = eft
         self.basis = basis or self._default_bases[self.eft]
         par_dict = par_dict or {}  # initialize empty if not given
@@ -115,6 +121,7 @@ class GlobalLikelihood(object):
         self.par_dict_default = flavio.default_parameters.get_central_all()
         self.par_dict_default.update(par_dict)
         self._par_dict_sm = None
+        self.fix_ckm = fix_ckm
         self.likelihoods = {}
         self.fast_likelihoods = {}
         self._custom_likelihoods_dict = custom_likelihoods or {}
@@ -337,7 +344,7 @@ class GlobalLikelihood(object):
         if not scale:
             raise ValueError("You need to provide a scale")
         w = self.get_wilson(wc_dict, scale)
-        return GlobalLikelihoodPoint(self, w)
+        return GlobalLikelihoodPoint(self, w, fix_ckm=self.fix_ckm)
 
     @dispatch(dict, (int, float))
     def parameter_point(self, wc_dict, scale):
@@ -345,7 +352,7 @@ class GlobalLikelihood(object):
         Wilson coefficient values (with keys corresponding to WCxf Wilson
         coefficient names) and the input scale."""
         w = self.get_wilson(wc_dict, scale)
-        return GlobalLikelihoodPoint(self, w)
+        return GlobalLikelihoodPoint(self, w, fix_ckm=self.fix_ckm)
 
     @dispatch(str)
     def parameter_point(self, filename):
@@ -354,13 +361,13 @@ class GlobalLikelihood(object):
         with open(filename, 'r') as f:
             wc = wcxf.WC.load(f)
         w = Wilson.from_wc(wc)
-        return GlobalLikelihoodPoint(self, w)
+        return GlobalLikelihoodPoint(self, w, fix_ckm=self.fix_ckm)
 
     @dispatch(Wilson)
     def parameter_point(self, w):
         """Choose a point in parameter space by providing an instance
         of `wilson.Wilson`."""
-        return GlobalLikelihoodPoint(self, w)
+        return GlobalLikelihoodPoint(self, w, fix_ckm=self.fix_ckm)
 
     @staticmethod
     def _get_inspire_dict(observables, ml):

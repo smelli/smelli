@@ -39,13 +39,15 @@ class TestCKM(unittest.TestCase):
 class TestSmelliCKM(unittest.TestCase):
     def test_init(self):
         gl = smelli.GlobalLikelihood()
+        # with fix_ckm
+        gl_fixckm = smelli.GlobalLikelihood(fix_ckm=True)
         self.assertEqual(gl.par_dict_default['Vcb'], par['Vcb'])
         VcbSM = gl.par_dict_sm['Vcb']
         VubSM = gl.par_dict_sm['Vub']
         VusSM = gl.par_dict_sm['Vus']
         deltaSM = gl.par_dict_sm['delta']
         self.assertAlmostEqual(par['Vcb'], VcbSM, delta=0.0002)
-        self.assertAlmostEqual(par['Vub'], VubSM, delta=0.0004)
+        self.assertAlmostEqual(par['Vub'], VubSM, delta=0.0005)
         self.assertAlmostEqual(par['Vus'], VusSM, delta=0.0006)
         pre = -4 * par['GF'] / sqrt(2)
         # Vcb
@@ -53,7 +55,7 @@ class TestSmelliCKM(unittest.TestCase):
         pp = gl.parameter_point(w)
         self.assertAlmostEqual(pp.par_dict_np['Vcb'] / VcbSM,  1.5, delta=0.03)
         # with fix_ckm
-        pp = gl.parameter_point(w, fix_ckm=True)
+        pp = gl_fixckm.parameter_point(w)
         self.assertEqual(pp.par_dict_np['Vcb'] / VcbSM,  1)
         # Vub
         w = Wilson({'lq3_3313': 0.5 * pre * VubSM * (-0.5) * exp(-1j * deltaSM)}, 91.1876, 'SMEFT', 'Warsaw')
