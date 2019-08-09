@@ -1,0 +1,2 @@
+observables: !include_merge_list
+  - observables_eeww.yaml
