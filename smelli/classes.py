@@ -219,6 +219,7 @@ class GlobalLikelihood(object):
             kwargs['Nexp'] = self._Nexp
         for name, flh in self.fast_likelihoods.items():
             flh.make_measurement(*args, **kwargs)
+        self._sm_cov_loaded = True
 
     def save_sm_covariances(self, folder):
         for name, flh in self.fast_likelihoods.items():
