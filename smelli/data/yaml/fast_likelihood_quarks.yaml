@@ -25,7 +25,9 @@ exclude_measurements:
   - LHCb B->K*mumu 2015 S 2.5-4
   - LHCb B->K*mumu 2015 S 4-6
   - LHCb B->K*mumu 2015 S 15-19
-  # exclude individual Bs->mumu measurements and only keep their combination
+  # exclude individual Bs->mumu measurements and old combination and only keep their new combination
   - CMS Bs->mumu 2013
   - LHCb Bs->mumu 2017
   - ATLAS Bs->mumu 2018
+  - inofficial combination Bs->mumu 2019
+
