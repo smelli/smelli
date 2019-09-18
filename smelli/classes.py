@@ -384,6 +384,13 @@ class GlobalLikelihood(object):
         return inspire_dict
 
     def number_observations_dict(self, exclude_observables=None):
+        """Get a dictionary of the number of "observations" for each
+        sublikelihood.
+
+        Here, an "observation" is defined as an individual measurment
+        of an observable. Thus, the number of observations is always
+        >= the number of observables.
+        """
         nobs_dict = {}
         for name, flh in self.fast_likelihoods.items():
             nobs_dict[name] = len(set(flh.observables) - set(exclude_observables or []))
@@ -547,12 +554,18 @@ class GlobalLikelihoodPoint(object):
         the dictionary returned by `log_likelihood_dict`."""
         return self.log_likelihood_dict()['global']
 
-    def pvalue_dict(self):
+    def pvalue_dict(self, n_par=0):
+        r"""Dictionary of $p$ values of sublikelihoods given the number `n_par`
+        of free parameters (default 0)."""
         nobs = self.likelihood.number_observations_dict()
         chi2 = self.chi2_dict()
-        return {k: pvalue(chi2[k], nobs[k]) for k in chi2}
+        return {k: pvalue(chi2[k], dof=max(1, nobs[k] - n_par)) for k in chi2}
 
     def chi2_dict(self):
+        r"""Dictionary of total $\chi^2$ values of each sublikelihood.
+
+        $$\chi^2 = -2 (\ln L + \ln L_\text{SM})$$
+        """
         ll = self.log_likelihood_dict()
         llsm = self.likelihood._log_likelihood_sm.copy()
         llsm['global'] = sum([v for k, v in llsm.items() if 'custom_' not in k])
