@@ -26,11 +26,11 @@ class GlobalLikelihood(object):
 
     User methods:
 
-    - `log_likelihood`: return an instance of LieklihoodResult
+    - `log_likelihood`: return an instance of LikelihoodResult
     given a dictionary of Wilson coefficients at a given scale
-    - `log_likelihood_wcxf`: return an instance of LieklihoodResult
+    - `log_likelihood_wcxf`: return an instance of LikelihoodResult
     given the path to a WCxf file
-    - `log_likelihood_wilson`: return an instance of LieklihoodResult+
+    - `log_likelihood_wilson`: return an instance of LikelihoodResult+
     given an instance of `wilson.Wilson`
 
     Utility methods:
