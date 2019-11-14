@@ -29,3 +29,6 @@ def get_datapath(package, resource):
     parts.insert(0, os.path.dirname(mod.__file__))
     resource_name = os.path.join(*parts)
     return resource_name
+
+def get_cachepath():
+    return os.path.join(os.getenv('HOME'), '.cache', 'smelli')
