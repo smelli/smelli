@@ -1,4 +1,4 @@
-from . import ckm
+from .ckm import CKMScheme, CKMSchemeRmuBtaunuBxlnuDeltaM
 import unittest
 import flavio
 from wilson import Wilson
@@ -12,7 +12,7 @@ par = flavio.default_parameters.get_central_all()
 
 class TestCKM(unittest.TestCase):
     def test_sm(self):
-        scheme = ckm.CKMSchemeRmuBtaunuBxlnuDeltaM()
+        scheme = CKMScheme(CKMSchemeRmuBtaunuBxlnuDeltaM)
         scheme.ckm_covariance()
         Vus, Vcb, Vub, delta = scheme.ckm_np(None)
         self.assertAlmostEqual(Vus, 0.225, delta=0.001)
@@ -21,7 +21,7 @@ class TestCKM(unittest.TestCase):
         self.assertAlmostEqual(delta, 1.15, delta=0.2)
 
     def test_ckm_np(self):
-        scheme = ckm.CKMSchemeRmuBtaunuBxlnuDeltaM()
+        scheme = CKMScheme(CKMSchemeRmuBtaunuBxlnuDeltaM)
         w = Wilson({'lq3_1123': 0.04e-5,
                     'lq3_3313': 0.008e-5,
                     'lq3_2212': 0.5e-7,
@@ -67,7 +67,7 @@ class TestSmelliCKM(unittest.TestCase):
         self.assertAlmostEqual(pp.par_dict_np['Vus'] / VusSM, 1.1, delta=0.03)
 
     def test_fast_likelihoods(self):
-        scheme = ckm.CKMSchemeRmuBtaunuBxlnuDeltaM()
+        scheme = CKMScheme(CKMSchemeRmuBtaunuBxlnuDeltaM)
         ckm_central = scheme.ckm_np()
         gl = smelli.GlobalLikelihood()
         for fl in gl.fast_likelihoods.values():
