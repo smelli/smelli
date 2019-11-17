@@ -15,8 +15,8 @@ def get_scheme_definitions():
         if inspect.isclass(v)
         and {'ckm_fac', 'get_ckm', 'jacobian'} <= set(
             dict(inspect.getmembers(v, inspect.isfunction)).keys())
-        and 'observables' in set(
-            dict(inspect.getmembers(v, lambda m: isinstance(m, list))).keys())
+        and 'observables' in dict(
+            inspect.getmembers(v, lambda m: isinstance(m, list)))
     }
 
 
