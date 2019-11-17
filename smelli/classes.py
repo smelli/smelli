@@ -280,7 +280,13 @@ class GlobalLikelihood(object):
         `Vus`, `Vcb`, `Vub`, `delta` have been replaced by their
         "true" values extracted assuming the SM.
         They should be almost (but not exactly) equal to the default
-        flavio CKM parameters."""
+        flavio CKM parameters.
+
+        Note that if `fix_ckm` is set to `True`, this method actually
+        returns the default parameter values.
+        """
+        if self.fix_ckm:
+            return self.par_dict_default
         if self._par_dict_sm is None:
             par_dict_sm = self.par_dict_default.copy()
             par_dict_sm.update(self.get_ckm_sm())
