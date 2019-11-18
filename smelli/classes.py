@@ -236,16 +236,20 @@ class GlobalLikelihood(object):
 
     def save_sm_covariances(self, folder):
         for name, flh in self.fast_likelihoods.items():
-            filename = os.path.join(
-                folder, '{}_{}.p'.format(name, self._ckm_scheme_name)
-            )
+            if self.fix_ckm:
+                name = name + '_fix_ckm'
+            else:
+                name = name + '_' + self._ckm_scheme_name
+            filename = os.path.join(folder, name + '.p')
             flh.sm_covariance.save(filename)
 
     def load_sm_covariances(self, folder):
         for name, flh in self.fast_likelihoods.items():
-            filename = os.path.join(
-                folder, '{}_{}.p'.format(name, self._ckm_scheme_name)
-            )
+            if self.fix_ckm:
+                name = name + '_fix_ckm'
+            else:
+                name = name + '_' + self._ckm_scheme_name
+            filename = os.path.join(folder, name + '.p')
             flh.sm_covariance.load(filename)
 
     def save_exp_covariances(self, folder):

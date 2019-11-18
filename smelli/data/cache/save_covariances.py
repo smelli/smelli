@@ -20,11 +20,13 @@ def main(argv):
     parser.add_argument('-s', type=str, default=DEFAULT_ckm_scheme,
                         help="Name of CKM scheme (default {})".format(
                         DEFAULT_ckm_scheme))
+    parser.add_argument('--fix_ckm', action='store_true',
+                        help='Fix CKM values to their SM values (default false)')
 
     args = parser.parse_args()
 
     from smelli import GlobalLikelihood
-    gl = GlobalLikelihood(ckm_scheme=args.s)
+    gl = GlobalLikelihood(ckm_scheme=args.s, fix_ckm=args.fix_ckm)
 
     logging.info("Computing covariances with N={} and {} threads".format(args.n, args.t))
 
