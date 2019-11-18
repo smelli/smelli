@@ -171,7 +171,8 @@ class GlobalLikelihood(object):
                 continue
             with open(self._get_yaml_path(fn), 'r') as f:
                 yaml_dict = flavio.io.yaml.load_include(f)
-                yaml_dict['par_obj'] = par_ckm_dict
+                if not self.fix_ckm:
+                    yaml_dict['par_obj'] = par_ckm_dict
                 L = FastLikelihood.load_dict(yaml_dict)
             self.fast_likelihoods[fn] = L
         for fn in self._likelihoods_yaml:
