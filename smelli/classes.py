@@ -345,6 +345,8 @@ class GlobalLikelihood(object):
                     info[obs]['lh_name'] = lh_name
                     info[obs]['name'] = obs if isinstance(obs, str) else obs[0]
                     info[obs]['ll_sm'] = p_comb.logpdf([pred_sm[obs]])
+                    if info[obs]['ll_sm'] == -np.inf:
+                        info[obs]['ll_sm'] = -1e100
                     info[obs]['ll_central'] = p_comb.logpdf([p_comb.central_value])
             self._obstable_sm = info
         return self._obstable_sm
@@ -626,6 +628,8 @@ class GlobalLikelihoodPoint(object):
                     ll_sm = info[obs]['ll_sm']
                     p_comb = info[obs]['exp. PDF']
                     ll = p_comb.logpdf([pred[obs]])
+                    if ll == -np.inf:
+                        ll = -1e100
                     info[obs]['pull exp.'] = pull(-2 * (ll - ll_central), dof=1)
                     s = -1 if ll > ll_sm else 1
                     info[obs]['pull SM'] = s * pull(-2 * (ll - ll_sm), dof=1)
