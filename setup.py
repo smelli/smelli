@@ -27,4 +27,9 @@ setup(name='smelli',
       extras_require={
             'testing': ['nose'],
       },
+      entry_points={
+        'console_scripts': [
+          'smelli = smelli.cli:cli',
+        ]
+      }
       )
