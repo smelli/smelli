@@ -1,7 +1,9 @@
 - name: tau_n
   me_E: 0.655
 - name: Atilde_n
-  me_E: 0.569
+  me_E: 0.559
+- name: Atilde_n
+  me_E: 0.586
 - name: lambdaAB_n
   me_E: 0.581
 - a_n
