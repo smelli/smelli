@@ -9,7 +9,7 @@ import numpy as np
 from collections import OrderedDict
 from math import ceil
 from .util import tree, get_datapath
-from .ckm import CKMScheme, get_scheme_definitions
+from .ckm import get_ckm_schemes
 from multipledispatch import dispatch
 from copy import copy
 import os
@@ -125,11 +125,10 @@ class GlobalLikelihood(object):
         self._par_dict_sm = None
         self.fix_ckm = fix_ckm
         try:
-            ckm_scheme_definition = get_scheme_definitions()[ckm_scheme]
+            self._ckm_scheme = get_ckm_schemes()[ckm_scheme]
+            self._ckm_scheme_name = ckm_scheme
         except:
             raise ValueError("CKM scheme '{}' is not defined.".format(ckm_scheme))
-        self._ckm_scheme_name = ckm_scheme
-        self._ckm_scheme = CKMScheme(ckm_scheme_definition)
         self.likelihoods = {}
         self.fast_likelihoods = {}
         self._custom_likelihoods_dict = custom_likelihoods or {}

@@ -2,6 +2,7 @@ import flavio
 import numpy as np
 from math import sin, cos, sqrt, acos
 import inspect
+from abc import ABC, abstractmethod
 
 
 m = flavio.Measurement('CKM ratio measurements')
@@ -9,54 +10,69 @@ m.set_constraint('RKpi(P+->munu)', '1.3368+-0.0032')
 m.set_constraint('DeltaM_d/DeltaM_s', '0.02852+-0.00011')
 
 
-def get_scheme_definitions():
+def get_ckm_schemes():
     return {
-        k: v for k,v in globals().items()
+        k: v() for k,v in globals().items()
         if inspect.isclass(v)
-        and {'ckm_fac', 'get_ckm', 'jacobian'} <= set(
-            dict(inspect.getmembers(v, inspect.isfunction)).keys())
-        and 'observables' in dict(
-            inspect.getmembers(v, lambda m: isinstance(m, list)))
+        and issubclass(v, CKMScheme)
+        and len(v.observables) == 4
     }
 
 
-class CKMScheme:
+class CKMScheme(ABC):
     """Base class for schemes to determine the SMEFT CKM elements from
-    a set of four input observables."""
+    a set of four input observables.
 
-    def __init__(self, scheme_definition, par_obj=None):
+    This is an abstract class that contains the following abstract methods to be
+    overwritten by its subclasses:
+    - ckm_fac: static method with arguments `Vus`, `Vcb`, `Vub`, and
+      `delta` that returns a list containing the CKM prefactors of the
+      four observables in the order given by the `observales` attribute.
+    - get_ckm: static method that is the inverse of the `ckm_fac` method
+      such that `get_ckm(ckm_fac(Vus, Vcb, Vub, delta))` will return the
+      list `[Vus, Vcb, Vub, delta]`.
+    - jacobian: static method with arguments `Vus`, `Vcb`, `Vub`, and
+      `delta` that returns the Jacobian of the transformation defined by
+      the `ckm_fac` method in terms of a numpy array of shape (4,4).
+    Furthermore, subclasses have to overwrite the following class attribute:
+    - observables: class attribute containing a list of exactly four
+      observable strings. Currently, only observables without arguments
+      are supported. They must have existing, uncorrelated experimental
+      measurements.
+    """
+
+    observables = []
+
+    def __init__(self, par_obj=None):
         """Initialize the class.
 
         Parameters:
-        - scheme_definition: a class defining the scheme. Required attributes
-          and methods of this class are:
-          - observables: class attribute containing a list of exactly four
-            observable strings. Currently, only observables without arguments
-            are supported. They must have existing, uncorrelated experimental
-            measurements.
-          - ckm_fac: static method with arguments `Vus`, `Vcb`, `Vub`, and
-            `delta` that returns a list containing the CKM prefactors of the
-            four observables in the order given by the `observales` attribute.
-          - get_ckm: static method that is the inverse of the `ckm_fac` method
-            such that `get_ckm(ckm_fac(Vus, Vcb, Vub, delta))` will return the
-            list `[Vus, Vcb, Vub, delta]`.
-          - jacobian: static method with arguments `Vus`, `Vcb`, `Vub`, and
-            `delta` that returns the Jacobian of the transformation defined by
-            the `ckm_fac` method in terms of a numpy array of shape (4,4).
         - par_obj: instance of `flavio.classes.ParameterConstraints`.
           Defaults to `flavio.default_parameters`.
         """
-        self.observables = scheme_definition.observables
-        self.ckm_fac = scheme_definition.ckm_fac
-        self.get_ckm = scheme_definition.get_ckm
-        self.jacobian = scheme_definition.jacobian
-        assert len(self.observables ) == 4, "Exactly 4 observables should be specified"
+        assert len(self.observables) == 4, "Exactly 4 observables should be specified"
         self.par_obj = par_obj or flavio.default_parameters
         # central parameter values
         self.par_central = self.par_obj.get_central_all()
         # central CKM values
         self.ckm_par = ['Vus', 'Vub', 'Vcb', 'delta']
         self.ckm_initial = {k: self.par_central[k] for k in self.ckm_par}
+
+    @staticmethod
+    @abstractmethod
+    def ckm_fac(Vus, Vcb, Vub, delta):
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def get_ckm(ckm_fac):
+        pass
+
+
+    @staticmethod
+    @abstractmethod
+    def jacobian(Vus, Vcb, Vub, delta):
+        pass
 
     def sm_covariance(self, N=1000):
         """Compute the covariance of theory predictions for the four input
@@ -143,7 +159,7 @@ class CKMScheme:
         return Vus, Vcb, Vub, delta
 
 
-class CKMSchemeRmuBtaunuBxlnuDeltaM:
+class CKMSchemeRmuBtaunuBxlnuDeltaM(CKMScheme):
     """CKM scheme where the four input observables are given by:
     - 'RKpi(P+->munu)' (mostly fixing `Vus`)
     - 'BR(B->Xcenu)' (fixing `Vcb`)

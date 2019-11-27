@@ -1,12 +1,11 @@
 import smelli
-from smelli.ckm import CKMScheme, get_scheme_definitions
+from smelli.ckm import get_ckm_schemes
 import numpy as np
 import yaml
 
 FILE = 'par_ckm'
 
-def save_ckm(scheme_definition,file_path,N=10000):
-    scheme = CKMScheme(scheme_definition)
+def save_ckm(scheme,file_path,N=10000):
     val = scheme.ckm_np()
     cov = scheme.ckm_covariance(N=10000)
     err = np.sqrt(np.diag(cov))
@@ -32,6 +31,6 @@ def save_ckm(scheme_definition,file_path,N=10000):
     with open(file_path, 'w') as f:
         yaml.dump(dat, f)
 
-for name, scheme_definition in get_scheme_definitions().items():
+for name, ckm_scheme in get_ckm_schemes().items():
     file_path = '{}_{}.yaml'.format(FILE,name)
-    save_ckm(scheme_definition,file_path,N=10000)
+    save_ckm(ckm_scheme,file_path,N=10000)
