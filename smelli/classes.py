@@ -9,8 +9,9 @@ import pandas as pd
 import numpy as np
 from collections import OrderedDict
 from math import ceil
-from .util import tree, get_datapath
+from .util import tree, get_datapath, get_cachepath
 from . import ckm
+from .unbinned import UnbinnedParameterLikelihood
 from multipledispatch import dispatch
 from copy import copy
 import os
@@ -26,11 +27,11 @@ class GlobalLikelihood(object):
 
     User methods:
 
-    - `log_likelihood`: return an instance of LieklihoodResult
+    - `log_likelihood`: return an instance of LikelihoodResult
     given a dictionary of Wilson coefficients at a given scale
-    - `log_likelihood_wcxf`: return an instance of LieklihoodResult
+    - `log_likelihood_wcxf`: return an instance of LikelihoodResult
     given the path to a WCxf file
-    - `log_likelihood_wilson`: return an instance of LieklihoodResult+
+    - `log_likelihood_wilson`: return an instance of LikelihoodResult+
     given an instance of `wilson.Wilson`
 
     Utility methods:
@@ -124,6 +125,7 @@ class GlobalLikelihood(object):
         self.fix_ckm = fix_ckm
         self.likelihoods = {}
         self.fast_likelihoods = {}
+        self.unbinned_likelihoods = {}
         self._custom_likelihoods_dict = custom_likelihoods or {}
         self.custom_likelihoods = {}
         self._load_likelihoods(include_likelihoods=include_likelihoods,
@@ -172,6 +174,31 @@ class GlobalLikelihood(object):
             with open(self._get_likelihood_path(fn), 'r') as f:
                 L = Likelihood.load(f)
             self.likelihoods[fn] = L
+        unbinned_likelihoods = []
+        if type(include_likelihoods) is str:
+            for dn in include_likelihoods.split(','):
+                if not dn.startswith('unbinned_'):
+                    continue
+                unbinned_likelihoods.append(dn)
+        elif type(include_likelihoods) is tuple or type(include_likelihoods) is list:
+            for dn in include_likelihoods:
+                if not dn.startswith('unbinned_'):
+                    continue
+                unbinned_likelihoods.append(dn)
+        for dn in unbinned_likelihoods:
+            base_path = os.path.join(get_cachepath(), dn)
+            if not os.path.exists(base_path):
+                raise RuntimeError('Unbinned likelihood \'{}\' not found in cache! Forgot to download?'.format(dn))
+            if not os.path.isdir(base_path):
+                raise RuntimeError('Expected \'{}\' to be a directory!'.format(base_path))
+
+            desc_path = os.path.join(base_path, 'description.yaml')
+            if not os.path.exists(desc_path):
+                raise RuntimeError('Unbinned likelihood \'{}\' has no description! Clear cache and re-download?'.format(dn))
+
+            with open(desc_path, 'r') as f:
+                L = UnbinnedParameterLikelihood.load(f, **{'base_path': base_path})
+            self.unbinned_likelihoods[dn] = L
         for name, observables in self._custom_likelihoods_dict.items():
             L = CustomLikelihood(self, observables)
             self.custom_likelihoods['custom_' + name] = L
@@ -335,6 +362,8 @@ class GlobalLikelihood(object):
             ll[name] = lh.log_likelihood(par_dict, w, delta=True)
         for name, clh in self.custom_likelihoods.items():
             ll[name] = clh.log_likelihood(par_dict, w, delta=True)
+        for name, ulh in self.unbinned_likelihoods.items():
+            ll[name] = ulh.log_likelihood(par_dict, w)
         return ll
 
     @dispatch(dict)

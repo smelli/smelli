@@ -1,6 +1,6 @@
 import unittest
 from .classes import *
-
+from .unbinned import *
 
 class TestGlobalLikelihood(unittest.TestCase):
 
@@ -69,3 +69,12 @@ class TestGlobalLikelihoodPoint(unittest.TestCase):
         res = gl.parameter_point({}, 91.1876)
         pval = res.pvalue_dict()
         self.assertTrue(0 < pval['global'] < 1)
+
+    def test_unbinned(self):
+        with open(get_datapath('smelli', 'data/yaml/datasets.yaml'), 'r') as f:
+            D = DataSets.load(f)
+        D.download('unbinned_flavio_test')
+        gl = GlobalLikelihood(include_likelihoods='unbinned_flavio_test')
+        self.assertIsInstance(gl, GlobalLikelihood)
+        glp = gl.parameter_point({'lq1_2223': 1e-8}, scale=1000)
+        self.assertIsInstance(glp, GlobalLikelihoodPoint)

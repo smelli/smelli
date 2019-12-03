@@ -1,0 +1,5 @@
+datasets:
+    unbinned_flavio_test:
+        urls:
+            - http://users.ph.tum.de/ga53yez/smelli/description.yaml
+            - http://users.ph.tum.de/ga53yez/smelli/samples.npy

@@ -23,8 +23,13 @@ setup(name='smelli',
                    'data/test/*.yaml',
                    ]
       },
-      install_requires=['flavio~=' + __flavio__version__, 'pandas', 'multipledispatch'],
+      install_requires=['flavio~=' + __flavio__version__, 'pandas', 'multipledispatch', 'wcxf', 'scikit-learn'],
       extras_require={
             'testing': ['nose'],
       },
+      entry_points={
+        'console_scripts': [
+          'smelli = smelli.cli:cli',
+        ]
+      }
       )
