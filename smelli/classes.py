@@ -171,7 +171,8 @@ class GlobalLikelihood(object):
                 continue
             with open(self._get_yaml_path(fn), 'r') as f:
                 yaml_dict = flavio.io.yaml.load_include(f)
-                yaml_dict['par_obj'] = par_ckm_dict
+                if not self.fix_ckm:
+                    yaml_dict['par_obj'] = par_ckm_dict
                 L = FastLikelihood.load_dict(yaml_dict)
             self.fast_likelihoods[fn] = L
         for fn in self._likelihoods_yaml:
@@ -236,16 +237,20 @@ class GlobalLikelihood(object):
 
     def save_sm_covariances(self, folder):
         for name, flh in self.fast_likelihoods.items():
-            filename = os.path.join(
-                folder, '{}_{}.p'.format(name, self._ckm_scheme_name)
-            )
+            if self.fix_ckm:
+                name = name + '_fix_ckm'
+            else:
+                name = name + '_' + self._ckm_scheme_name
+            filename = os.path.join(folder, name + '.p')
             flh.sm_covariance.save(filename)
 
     def load_sm_covariances(self, folder):
         for name, flh in self.fast_likelihoods.items():
-            filename = os.path.join(
-                folder, '{}_{}.p'.format(name, self._ckm_scheme_name)
-            )
+            if self.fix_ckm:
+                name = name + '_fix_ckm'
+            else:
+                name = name + '_' + self._ckm_scheme_name
+            filename = os.path.join(folder, name + '.p')
             flh.sm_covariance.load(filename)
 
     def save_exp_covariances(self, folder):
@@ -280,7 +285,13 @@ class GlobalLikelihood(object):
         `Vus`, `Vcb`, `Vub`, `delta` have been replaced by their
         "true" values extracted assuming the SM.
         They should be almost (but not exactly) equal to the default
-        flavio CKM parameters."""
+        flavio CKM parameters.
+
+        Note that if `fix_ckm` is set to `True`, this method actually
+        returns the default parameter values.
+        """
+        if self.fix_ckm:
+            return self.par_dict_default
         if self._par_dict_sm is None:
             par_dict_sm = self.par_dict_default.copy()
             par_dict_sm.update(self.get_ckm_sm())
@@ -334,6 +345,8 @@ class GlobalLikelihood(object):
                     info[obs]['lh_name'] = lh_name
                     info[obs]['name'] = obs if isinstance(obs, str) else obs[0]
                     info[obs]['ll_sm'] = p_comb.logpdf([pred_sm[obs]])
+                    if info[obs]['ll_sm'] == -np.inf:
+                        info[obs]['ll_sm'] = -1e100
                     info[obs]['ll_central'] = p_comb.logpdf([p_comb.central_value])
             self._obstable_sm = info
         return self._obstable_sm
@@ -615,6 +628,8 @@ class GlobalLikelihoodPoint(object):
                     ll_sm = info[obs]['ll_sm']
                     p_comb = info[obs]['exp. PDF']
                     ll = p_comb.logpdf([pred[obs]])
+                    if ll == -np.inf:
+                        ll = -1e100
                     info[obs]['pull exp.'] = pull(-2 * (ll - ll_central), dof=1)
                     s = -1 if ll > ll_sm else 1
                     info[obs]['pull SM'] = s * pull(-2 * (ll - ll_sm), dof=1)
