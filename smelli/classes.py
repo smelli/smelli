@@ -1,6 +1,5 @@
 import flavio
-from wilson import Wilson
-import wcxf
+from wilson import Wilson, wcxf
 from flavio.statistics.likelihood import Likelihood, FastLikelihood
 from flavio.statistics.probability import NormalDistribution
 from flavio.statistics.functions import pull, pvalue
