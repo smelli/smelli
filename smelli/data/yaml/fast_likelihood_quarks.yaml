@@ -18,6 +18,11 @@ observables: !include_merge_list
   - observables_df2.yaml
   # K
   - observables_k.yaml
+  - observables_sulnu.yaml
+  # u->dlnu
+  - observables_n.yaml
+  - observables_beta.yaml
+  - observables_udlnu.yaml
 exclude_measurements:
   - LHCb B->K*mumu 2015 S 1.1-2.5
   - LHCb B->K*mumu 2015 S 2.5-4
