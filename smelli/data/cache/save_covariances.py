@@ -7,6 +7,7 @@ import logging
 import sys
 logging.basicConfig(level=logging.INFO)
 
+DEFAULT_ckm_scheme = 'CKMSchemeRmuBtaunuBxlnuDeltaM'
 
 def main(argv):
     parser = argparse.ArgumentParser(description='Recompute and save the SM covariances to the working directory.')
@@ -16,11 +17,14 @@ def main(argv):
                         help='Number of threads (default 1)')
     parser.add_argument('-f', action='store_true',
                         help='Force recomputation (default false)')
+    parser.add_argument('-s', type=str, default=DEFAULT_ckm_scheme,
+                        help="Name of CKM scheme (default {})".format(
+                        DEFAULT_ckm_scheme))
 
     args = parser.parse_args()
 
     from smelli import GlobalLikelihood
-    gl = GlobalLikelihood()
+    gl = GlobalLikelihood(ckm_scheme=args.s)
 
     logging.info("Computing covariances with N={} and {} threads".format(args.n, args.t))
 

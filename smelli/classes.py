@@ -9,7 +9,7 @@ import numpy as np
 from collections import OrderedDict
 from math import ceil
 from .util import tree, get_datapath
-from . import ckm
+from .ckm import get_ckm_schemes
 from multipledispatch import dispatch
 from copy import copy
 import os
@@ -71,7 +71,8 @@ class GlobalLikelihood(object):
                  exp_cov_folder=None,
                  sm_cov_folder=None,
                  custom_likelihoods=None,
-                 fix_ckm=False):
+                 fix_ckm=False,
+                 ckm_scheme='CKMSchemeRmuBtaunuBxlnuDeltaM'):
         """Initialize the likelihood.
 
         Optionally, a dictionary of parameters can be passed as `par_dict`.
@@ -112,6 +113,8 @@ class GlobalLikelihood(object):
           elements in the SM. If set to True, the CKM elements are fixed to
           their SM values, which can lead to inconsistent results, but also
           to a significant speedup in specific cases.
+        - ckm_scheme: A string with the name of the class defining the CKM
+          scheme.
         """
         self.eft = eft
         self.basis = basis or self._default_bases[self.eft]
@@ -121,6 +124,11 @@ class GlobalLikelihood(object):
         self.par_dict_default.update(par_dict)
         self._par_dict_sm = None
         self.fix_ckm = fix_ckm
+        try:
+            self._ckm_scheme = get_ckm_schemes()[ckm_scheme]
+            self._ckm_scheme_name = ckm_scheme
+        except:
+            raise ValueError("CKM scheme '{}' is not defined.".format(ckm_scheme))
         self.likelihoods = {}
         self.fast_likelihoods = {}
         self._custom_likelihoods_dict = custom_likelihoods or {}
@@ -152,13 +160,19 @@ class GlobalLikelihood(object):
         if include_likelihoods is not None and exclude_likelihoods is not None:
             raise ValueError("include_likelihoods and exclude_likelihoods "
                              "should not be specified simultaneously.")
+        # load ckm parameters for given CKM scheme
+        par_ckm_file = 'par_ckm_{}.yaml'.format(self._ckm_scheme_name)
+        with open(self._get_yaml_path(par_ckm_file), 'r') as f:
+            par_ckm_dict = flavio.io.yaml.load_include(f)
         for fn in self._fast_likelihoods_yaml:
             if include_likelihoods is not None and fn not in include_likelihoods:
                 continue
             if exclude_likelihoods is not None and fn in exclude_likelihoods:
                 continue
-            with open(self._get_likelihood_path(fn), 'r') as f:
-                L = FastLikelihood.load(f)
+            with open(self._get_yaml_path(fn), 'r') as f:
+                yaml_dict = flavio.io.yaml.load_include(f)
+                yaml_dict['par_obj'] = par_ckm_dict
+                L = FastLikelihood.load_dict(yaml_dict)
             self.fast_likelihoods[fn] = L
         for fn in self._likelihoods_yaml:
             if include_likelihoods is not None and fn not in include_likelihoods:
@@ -168,15 +182,15 @@ class GlobalLikelihood(object):
             if self.eft != 'SMEFT' and fn in ['likelihood_ewpt.yaml',
                                               'likelihood_zlfv.yaml',]:
                 continue
-            with open(self._get_likelihood_path(fn), 'r') as f:
+            with open(self._get_yaml_path(fn), 'r') as f:
                 L = Likelihood.load(f)
             self.likelihoods[fn] = L
         for name, observables in self._custom_likelihoods_dict.items():
             L = CustomLikelihood(self, observables)
             self.custom_likelihoods['custom_' + name] = L
 
-    def _get_likelihood_path(self, name):
-        """Return a path for the likelihood specified by `name`.
+    def _get_yaml_path(self, name):
+        """Return a path for the YAML file specified by `name`.
         If a YAML file with that name is found in the package's data
         directory, that is used. Otherwise, `name` is assumed to be a path.
 
@@ -222,12 +236,16 @@ class GlobalLikelihood(object):
 
     def save_sm_covariances(self, folder):
         for name, flh in self.fast_likelihoods.items():
-            filename = os.path.join(folder, name + '.p')
+            filename = os.path.join(
+                folder, '{}_{}.p'.format(name, self._ckm_scheme_name)
+            )
             flh.sm_covariance.save(filename)
 
     def load_sm_covariances(self, folder):
         for name, flh in self.fast_likelihoods.items():
-            filename = os.path.join(folder, name + '.p')
+            filename = os.path.join(
+                folder, '{}_{}.p'.format(name, self._ckm_scheme_name)
+            )
             flh.sm_covariance.load(filename)
 
     def save_exp_covariances(self, folder):
@@ -253,8 +271,7 @@ class GlobalLikelihood(object):
                              " by calling `make_measurement`.")
 
     def get_ckm_sm(self):
-        scheme = ckm.CKMSchemeRmuBtaunuBxlnuDeltaM()
-        Vus, Vcb, Vub, delta = scheme.ckm_np(w=None)
+        Vus, Vcb, Vub, delta = self._ckm_scheme.ckm_np(w=None)
         return {'Vus': Vus, 'Vcb': Vcb, 'Vub': Vub, 'delta': delta}
 
     @property
@@ -504,8 +521,7 @@ class GlobalLikelihoodPoint(object):
         """return the values of the four "true" CKM parameters
         `Vus`, `Vcb`, `Vub`, `delta`, extracted from the four input observables
         for this parameter point in Wilson coefficient space."""
-        # the default 4-observable scheme
-        scheme = ckm.CKMSchemeRmuBtaunuBxlnuDeltaM()
+        scheme = self.likelihood._ckm_scheme
         try:
             Vus, Vcb, Vub, delta = scheme.ckm_np(self.w_input)
         except ValueError:

@@ -1,6 +1,4 @@
 name: Fast Likelihood Lepton Sector
-par_obj: !include_merge_list
-  - par_ckm.yaml
 observables: !include_merge_list
   # tau->nuff and tau->Pnu
   - observables_taucc.yaml
