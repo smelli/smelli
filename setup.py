@@ -24,7 +24,7 @@ setup(name='smelli',
                    ]
       },
       install_requires=[
-        'flavio~=' + __flavio__version__,
+        'flavio>=' + __flavio__version__,
         'wilson',
         'pandas',
         'multipledispatch'
