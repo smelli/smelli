@@ -46,6 +46,11 @@ class GlobalLikelihood(object):
 
     _default_bases = {'SMEFT': 'Warsaw', 'WET': 'flavio'}
 
+    _fast_likelihoods_yaml_fixckm = [
+        'fast_likelihood_quarks_fixckm.yaml',
+        'fast_likelihood_leptons.yaml'
+    ]
+
     _fast_likelihoods_yaml = [
         'fast_likelihood_quarks.yaml',
         'fast_likelihood_leptons.yaml'
@@ -126,6 +131,8 @@ class GlobalLikelihood(object):
         self.par_dict_default.update(par_dict)
         self._par_dict_sm = None
         self.fix_ckm = fix_ckm
+        if self.fix_ckm:
+            self._fast_likelihoods_yaml = self._fast_likelihoods_yaml_fixckm
         try:
             self._ckm_scheme = get_ckm_schemes()[ckm_scheme]
             self._ckm_scheme_name = ckm_scheme
