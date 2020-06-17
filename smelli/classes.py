@@ -162,6 +162,11 @@ class GlobalLikelihood(object):
         if include_likelihoods is not None and exclude_likelihoods is not None:
             raise ValueError("include_likelihoods and exclude_likelihoods "
                              "should not be specified simultaneously.")
+        for argument_name, argument in [('exclude_likelihoods', exclude_likelihoods), ('include_likelihoods',include_likelihoods)]:
+            if argument:
+                unknown_likelihoods = set(argument) - set(self._fast_likelihoods_yaml + self._likelihoods_yaml)
+                if unknown_likelihoods:  
+                    raise ValueError("{} contains unknown likelihoods: {}".format(argument_name,unknown_likelihoods))
         # load ckm parameters for given CKM scheme
         par_ckm_file = 'par_ckm_{}.yaml'.format(self._ckm_scheme_name)
         with open(self._get_yaml_path(par_ckm_file), 'r') as f:
