@@ -62,6 +62,7 @@ If you want to follow this route, please open an [issue](https://github.com/smel
 In alphabetical order:
 
 - Jason Aebischer
+- Matthew Kirk
 - Jacky Kumar
 - Peter Stangl
 - David M. Straub
