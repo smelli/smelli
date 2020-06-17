@@ -53,6 +53,8 @@ class TestGlobalLikelihood(unittest.TestCase):
         gl = GlobalLikelihood(eft='WET', basis='flavio', exclude_likelihoods=['likelihood_lfv.yaml'])
         ll = gl.parameter_point({}, 100).log_likelihood_dict()
         self.assertNotIn('likelihood_lfv.yaml', set(ll.keys()))
+        self.assertRaises(ValueError, GlobalLikelihood, include_likelihoods=["nonexistent_likelihood.yaml"])
+        self.assertRaises(ValueError, GlobalLikelihood, exclude_likelihoods=["nonexistent_likelihood.yaml"])
 
 
 class TestGlobalLikelihoodPoint(unittest.TestCase):
