@@ -14,6 +14,8 @@ from multipledispatch import dispatch
 from copy import copy
 import os
 from functools import partial
+from operator import itemgetter
+from numbers import Number
 
 
 # by default, smelli uses leading log accuracy for SMEFT running!
@@ -456,13 +458,15 @@ class GlobalLikelihood(object):
 
         Parameters:
 
-        - `coeff_x`: Wilson coefficient on x axis (string)
-        - `coeff_y`: Wilson coefficient on y axis (string)
+        - `wc_fct`: function of two parameters x and y returning a dictionary
+                    with Wilson coefficients
         - `x_min`: minimum value of Wilson coefficient on x axis
         - `x_max`: maximum value of Wilson coefficient on x axis
         - `y_min`: minimum value of Wilson coefficient on y axis
         - `y_max`: maximum value of Wilson coefficient on y axis
-        - `scale`: renormalization scale in GeV
+        - `scale`: either a function of two parameters x and y returning the
+                   renormalization scale in GeV, or a numerical value fixing the
+                   scale
         - `steps`: number of steps in each direction. The computing time scales
                    with the square of this number.
         - `threads`: number of threads for parallel computation (default: 1)
@@ -481,10 +485,12 @@ class GlobalLikelihood(object):
         x, y = np.meshgrid(_x, _y)
         xy = np.array([x, y]).reshape(2, steps**2).T
         xy_enumerated = list(enumerate(xy))
-        ll = partial(_log_likelihood_2d, gl=self, wc_fct=wc_fct, scale=scale)
+        if isinstance(scale,Number):
+            scale_fct = partial(_scale_fct_fixed, scale=scale)
+        else:
+            scale_fct = scale
+        ll = partial(_log_likelihood_2d, gl=self, wc_fct=wc_fct, scale_fct=scale_fct)
         from multiprocessing import Pool
-        # print(ll(xy_enumerated[0]))
-        # print(ll(xy_enumerated[-1]))
         if threads > 1:
             pool =  Pool(threads)
             ll_dict_list_enumerated = pool.map(ll, xy_enumerated)
@@ -492,21 +498,25 @@ class GlobalLikelihood(object):
             pool.join()
         else:
             ll_dict_list_enumerated = map(ll, xy_enumerated)
-        ll_enumerated_dict = dict(list(ll_dict_list_enumerated))
-        order_keys = sorted(ll_enumerated_dict.keys())
-        ll_dict_list = [ll_enumerated_dict[k] for k in order_keys]
+        ll_dict_list = [
+            ll_dict[1] for ll_dict in
+            sorted(ll_dict_list_enumerated, key=itemgetter(0))
+        ]
         plotdata = {}
         keys = ll_dict_list[0].keys()  # look at first dict to fix keys
         for k in keys:
             z = -2 * np.array([ll_dict[k] for ll_dict in ll_dict_list]).reshape((steps, steps))
             plotdata[k] = {'x': x, 'y': y, 'z': z}
-        for k in plotdata:
-            z = np.array(plotdata[k]['z'])
-            plotdata[k]['z'] = z - np.min(z)
         return plotdata
 
+def _scale_fct_fixed(x, y, scale):
+    """
+    This is a helper function that is necessary because multiprocessing requires
+    a picklable (i.e. top-level) object for parallel computation.
+    """
+    return scale
 
-def _log_likelihood_2d(xy_enumerated, gl, wc_fct, scale):
+def _log_likelihood_2d(xy_enumerated, gl, wc_fct, scale_fct):
     """Compute the likelihood on a 2D grid of 2 Wilson coefficients.
 
     This function is necessary because multiprocessing requires a picklable
@@ -514,7 +524,7 @@ def _log_likelihood_2d(xy_enumerated, gl, wc_fct, scale):
     """
     number, xy = xy_enumerated
     x, y = xy
-    pp = gl.parameter_point(wc_fct(x, y), scale)
+    pp = gl.parameter_point(wc_fct(x, y), scale_fct(x, y))
     ll_dict = pp.log_likelihood_dict()
     return (number, ll_dict)
 
