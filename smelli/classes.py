@@ -13,6 +13,9 @@ from .ckm import get_ckm_schemes
 from multipledispatch import dispatch
 from copy import copy
 import os
+from functools import partial
+from operator import itemgetter
+from numbers import Number
 
 
 # by default, smelli uses leading log accuracy for SMEFT running!
@@ -441,6 +444,89 @@ class GlobalLikelihood(object):
             nobs_dict[name] = clh.get_number_observations()
         nobs_dict['global'] = sum([v for k, v in nobs_dict.items() if 'custom_' not in k])
         return nobs_dict
+
+    def plot_data_2d(self,
+                     wc_fct,
+                     x_min, x_max, y_min, y_max,
+                     scale,
+                     steps=20,
+                     threads=1):
+        """Compute the likelihood on a grid of two non-zero Wilson coefficients.
+
+        This method is meant for producing contour plots with `flavio.plots`
+        and `matplotlib` in the plane of two Wilson coefficients.
+
+        Parameters:
+
+        - `wc_fct`: function of two parameters x and y returning a dictionary
+                    with Wilson coefficients
+        - `x_min`: minimum value of Wilson coefficient on x axis
+        - `x_max`: maximum value of Wilson coefficient on x axis
+        - `y_min`: minimum value of Wilson coefficient on y axis
+        - `y_max`: maximum value of Wilson coefficient on y axis
+        - `scale`: either a function of two parameters x and y returning the
+                   renormalization scale in GeV, or a numerical value fixing the
+                   scale
+        - `steps`: number of steps in each direction. The computing time scales
+                   with the square of this number.
+        - `threads`: number of threads for parallel computation (default: 1)
+
+        Returns:
+
+        A dictionary of the  form
+        `{'likelihood_A': dat_A, 'likelihood_B': dat_B, ...}`
+        where `'likelihood_A'` etc. are the names of the sub- and custom
+        likelihoods (as return by `GlobalLikelihoodPoint.log_likelihood_dict`)
+        and `dat_A` etc. are dictionaries with the keys `x`, `y`, `z`, that
+        can be directly fed to the `flavio.plots.contour` plot function.
+        """
+        _x = np.linspace(x_min, x_max, steps)
+        _y = np.linspace(y_min, y_max, steps)
+        x, y = np.meshgrid(_x, _y)
+        xy = np.array([x, y]).reshape(2, steps**2).T
+        xy_enumerated = list(enumerate(xy))
+        if isinstance(scale,Number):
+            scale_fct = partial(_scale_fct_fixed, scale=scale)
+        else:
+            scale_fct = scale
+        ll = partial(_log_likelihood_2d, gl=self, wc_fct=wc_fct, scale_fct=scale_fct)
+        from multiprocessing import Pool
+        if threads > 1:
+            pool =  Pool(threads)
+            ll_dict_list_enumerated = pool.map(ll, xy_enumerated)
+            pool.close()
+            pool.join()
+        else:
+            ll_dict_list_enumerated = map(ll, xy_enumerated)
+        ll_dict_list = [
+            ll_dict[1] for ll_dict in
+            sorted(ll_dict_list_enumerated, key=itemgetter(0))
+        ]
+        plotdata = {}
+        keys = ll_dict_list[0].keys()  # look at first dict to fix keys
+        for k in keys:
+            z = -2 * np.array([ll_dict[k] for ll_dict in ll_dict_list]).reshape((steps, steps))
+            plotdata[k] = {'x': x, 'y': y, 'z': z}
+        return plotdata
+
+def _scale_fct_fixed(x, y, scale):
+    """
+    This is a helper function that is necessary because multiprocessing requires
+    a picklable (i.e. top-level) object for parallel computation.
+    """
+    return scale
+
+def _log_likelihood_2d(xy_enumerated, gl, wc_fct, scale_fct):
+    """Compute the likelihood on a 2D grid of 2 Wilson coefficients.
+
+    This function is necessary because multiprocessing requires a picklable
+    (i.e. top-level) object for parallel computation.
+    """
+    number, xy = xy_enumerated
+    x, y = xy
+    pp = gl.parameter_point(wc_fct(x, y), scale_fct(x, y))
+    ll_dict = pp.log_likelihood_dict()
+    return (number, ll_dict)
 
 
 class CustomLikelihood(object):
