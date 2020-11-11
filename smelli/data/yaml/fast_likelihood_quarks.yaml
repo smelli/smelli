@@ -6,6 +6,7 @@ observables: !include_merge_list
   - observables_bkstarmumu_cdf.yaml
   - observables_bkstarmumu_cms.yaml
   - observables_bkstarmumu_lhcb.yaml
+  - observables_bpkstarmumu_lhcb.yaml
   - observables_lambdablambdall_br.yaml
   - observables_lambdablambdall_afb.yaml
   - observables_bsmumu.yaml
