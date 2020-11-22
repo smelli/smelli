@@ -150,10 +150,10 @@ class GlobalLikelihood(object):
         self._load_likelihoods(include_likelihoods=include_likelihoods,
                                exclude_likelihoods=exclude_likelihoods)
         self._all_likelihoods = {
+            'global': _global_llh(self),
             **self.fast_likelihoods,
             **self.likelihoods,
             **self.custom_likelihoods,
-            'global': _global_llh(self),
         }
         self._Nexp = Nexp
         if exp_cov_folder is not None:
@@ -602,7 +602,7 @@ class GlobalLikelihood(object):
             for k in _initial_guesses.keys():
                 x,y,z = (plotdata[k][i] for i in 'xyz')
                 minimum = (z == np.min(z))
-                _initial_guesses[k] = np.concatenate((x[minimum], y[minimum]))
+                _initial_guesses[k] = [np.median(x[minimum]), np.median(y[minimum])]
             # check for inconsistencies
             if initial_guesses is not None:
                 _initial_guesses.update(initial_guesses)
