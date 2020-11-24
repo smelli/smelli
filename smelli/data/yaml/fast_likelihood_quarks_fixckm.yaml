@@ -24,8 +24,7 @@ observables: !include_merge_list
   - observables_beta.yaml
   - observables_udlnu.yaml
   # CKM input observables
-  - BR(B+->taunu)
-  - DeltaM_d
+  - observables_ckm_input.yaml
 exclude_measurements:
   - LHCb B->K*mumu 2015 S 1.1-2.5
   - LHCb B->K*mumu 2015 S 2.5-4
