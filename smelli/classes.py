@@ -8,7 +8,7 @@ import pandas as pd
 import numpy as np
 from collections import OrderedDict
 from math import ceil
-from .util import tree, get_datapath, multithreading
+from .util import tree, get_datapath, multithreading_map
 from .ckm import get_ckm_schemes
 from multipledispatch import dispatch
 from copy import copy
@@ -512,7 +512,7 @@ class GlobalLikelihood(object):
         else:
             scale_fct = scale
         ll = partial(_log_likelihood_2d, gl=self, wc_fct=wc_fct, scale_fct=scale_fct)
-        ll_dict_list_enumerated = multithreading(ll, xy_enumerated,
+        ll_dict_list_enumerated = multithreading_map(ll, xy_enumerated,
             threads=threads, pool=pool)
         ll_dict_list = [
             ll_dict[1] for ll_dict in

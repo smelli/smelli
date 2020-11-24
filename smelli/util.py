@@ -31,14 +31,14 @@ def get_datapath(package, resource):
     resource_name = os.path.join(*parts)
     return resource_name
 
-def multithreading(fct, joblist, threads=1, pool=None):
+def multithreading_map(func, iterable, threads=1, pool=None):
     if threads > 1 or pool is not None:
         if pool is None:
             pool_instance = Pool(threads)
         else:
             pool_instance = pool
         try:
-            result = pool_instance.map(fct, joblist)
+            result = pool_instance.map(func, iterable)
         except:
             pool_instance.close()
             raise
@@ -46,5 +46,5 @@ def multithreading(fct, joblist, threads=1, pool=None):
         if pool is None:
             pool_instance.join()
     else:
-        result = map(fct, joblist)
+        result = map(func, iterable)
     return result
