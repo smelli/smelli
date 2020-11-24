@@ -8,7 +8,7 @@ import pandas as pd
 import numpy as np
 from collections import OrderedDict
 from math import ceil
-from .util import tree, get_datapath
+from .util import tree, get_datapath, multithreading_map
 from .ckm import get_ckm_schemes
 from multipledispatch import dispatch
 from copy import copy
@@ -175,7 +175,7 @@ class GlobalLikelihood(object):
         for argument_name, argument in [('exclude_likelihoods', exclude_likelihoods), ('include_likelihoods',include_likelihoods)]:
             if argument:
                 unknown_likelihoods = set(argument) - set(self._fast_likelihoods_yaml + self._likelihoods_yaml)
-                if unknown_likelihoods:  
+                if unknown_likelihoods:
                     raise ValueError("{} contains unknown likelihoods: {}".format(argument_name,unknown_likelihoods))
         # load ckm parameters for given CKM scheme
         par_ckm_file = 'par_ckm_{}.yaml'.format(self._ckm_scheme_name)
@@ -454,10 +454,12 @@ class GlobalLikelihood(object):
 
     def plot_data_2d(self,
                      wc_fct,
-                     x_min, x_max, y_min, y_max,
                      scale,
+                     x_min, x_max, y_min, y_max,
+                     x_log=False, y_log=False,
                      steps=20,
-                     threads=1):
+                     threads=1,
+                     pool=None):
         """Compute the likelihood on a grid of two non-zero Wilson coefficients.
 
         This method is meant for producing contour plots with `flavio.plots`
@@ -465,18 +467,25 @@ class GlobalLikelihood(object):
 
         Parameters:
 
-        - `wc_fct`: function of two parameters x and y returning a dictionary
+        - `wc_fct`: function with two arguments x and y returning a dictionary
                     with Wilson coefficients
+        - `scale`: either a function with two arguments x and y returning the
+                   renormalization scale in GeV, or a numerical value fixing the
+                   scale
         - `x_min`: minimum value of Wilson coefficient on x axis
         - `x_max`: maximum value of Wilson coefficient on x axis
         - `y_min`: minimum value of Wilson coefficient on y axis
         - `y_max`: maximum value of Wilson coefficient on y axis
-        - `scale`: either a function of two parameters x and y returning the
-                   renormalization scale in GeV, or a numerical value fixing the
-                   scale
+        - `x_log`: boolean specifying whether logspace should be used for x
+                   values (default: False)
+        - `y_log`: boolean specifying whether logspace should be used for y
+                   values (default: False)
         - `steps`: number of steps in each direction. The computing time scales
-                   with the square of this number.
+                   with the square of this number. (default: 20)
         - `threads`: number of threads for parallel computation (default: 1)
+        - `pool`: either `None` or `pool` object for parallel computation. If
+                  `pool` object is provided, `threads` is ignored.
+                  (default: None)
 
         Returns:
 
@@ -487,8 +496,14 @@ class GlobalLikelihood(object):
         and `dat_A` etc. are dictionaries with the keys `x`, `y`, `z`, that
         can be directly fed to the `flavio.plots.contour` plot function.
         """
-        _x = np.linspace(x_min, x_max, steps)
-        _y = np.linspace(y_min, y_max, steps)
+        if x_log:
+            _x = np.logspace(x_min, x_max, steps)
+        else:
+            _x = np.linspace(x_min, x_max, steps)
+        if y_log:
+            _y = np.logspace(y_min, y_max, steps)
+        else:
+            _y = np.linspace(y_min, y_max, steps)
         x, y = np.meshgrid(_x, _y)
         xy = np.array([x, y]).reshape(2, steps**2).T
         xy_enumerated = list(enumerate(xy))
@@ -497,14 +512,8 @@ class GlobalLikelihood(object):
         else:
             scale_fct = scale
         ll = partial(_log_likelihood_2d, gl=self, wc_fct=wc_fct, scale_fct=scale_fct)
-        from multiprocessing import Pool
-        if threads > 1:
-            pool =  Pool(threads)
-            ll_dict_list_enumerated = pool.map(ll, xy_enumerated)
-            pool.close()
-            pool.join()
-        else:
-            ll_dict_list_enumerated = map(ll, xy_enumerated)
+        ll_dict_list_enumerated = multithreading_map(ll, xy_enumerated,
+            threads=threads, pool=pool)
         ll_dict_list = [
             ll_dict[1] for ll_dict in
             sorted(ll_dict_list_enumerated, key=itemgetter(0))
@@ -529,8 +538,7 @@ def _log_likelihood_2d(xy_enumerated, gl, wc_fct, scale_fct):
     This function is necessary because multiprocessing requires a picklable
     (i.e. top-level) object for parallel computation.
     """
-    number, xy = xy_enumerated
-    x, y = xy
+    number, (x, y) = xy_enumerated
     pp = gl.parameter_point(wc_fct(x, y), scale_fct(x, y))
     ll_dict = pp.log_likelihood_dict()
     return (number, ll_dict)

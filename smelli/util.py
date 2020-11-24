@@ -2,6 +2,7 @@ import pkgutil
 import os
 import sys
 from collections import defaultdict
+from multiprocessing import Pool
 
 
 def tree():
@@ -29,3 +30,21 @@ def get_datapath(package, resource):
     parts.insert(0, os.path.dirname(mod.__file__))
     resource_name = os.path.join(*parts)
     return resource_name
+
+def multithreading_map(func, iterable, threads=1, pool=None):
+    if threads > 1 or pool is not None:
+        if pool is None:
+            pool_instance = Pool(threads)
+        else:
+            pool_instance = pool
+        try:
+            result = pool_instance.map(func, iterable)
+        except:
+            pool_instance.close()
+            raise
+        pool_instance.close()
+        if pool is None:
+            pool_instance.join()
+    else:
+        result = map(func, iterable)
+    return result
