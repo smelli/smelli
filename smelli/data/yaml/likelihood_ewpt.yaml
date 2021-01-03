@@ -1,2 +1,4 @@
 observables: !include_merge_list
   - observables_ewpt.yaml
+exclude_measurements:
+  - LEP W->leptons ratios
