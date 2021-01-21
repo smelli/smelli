@@ -4,3 +4,5 @@ observables: !include_merge_list
   - observables_taucc.yaml
   # a_l
   - observables_g-2.yaml
+include_measurements: !include_merge_list
+  - measurements_leptons.yaml

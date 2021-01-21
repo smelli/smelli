@@ -27,17 +27,6 @@ observables: !include_merge_list
   - observables_udlnu.yaml
   # CKM input observables
   - observables_ckm_input.yaml
-exclude_measurements:
-  - LHCb B->K*mumu 2015 S 1.1-2.5
-  - LHCb B->K*mumu 2015 S 2.5-4
-  - LHCb B->K*mumu 2015 S 4-6
-  - LHCb B->K*mumu 2015 S 15-19
-  # exclude individual Bs->mumu measurements, old combinations, and non-Gaussian
-  # combinations and only keep the new Gaussian combination
-  - CMS Bs->mumu 2013
-  - CMS Bs->mumu 2019
-  - LHCb Bs->mumu 2017
-  - ATLAS Bs->mumu 2018
-  - inofficial combination Bs->mumu 2019
-  - inofficial combination Bs->mumu 2019 CMS19
-  - ATLAS CMS LHCb combination Bs->mumu 2020
+include_measurements: !include_merge_list
+  - measurements_quarks.yaml
+  - measurements_fixckm.yaml
