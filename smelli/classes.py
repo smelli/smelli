@@ -19,7 +19,12 @@ from numbers import Number
 import inspect
 from flavio.math.optimize import minimize_robust
 from smelli import __flavio__version__
+from pkg_resources import packaging
 
+_flavio_up_to_date = (
+    packaging.version.parse(flavio.__version__)
+    >= packaging.version.parse(__flavio__version__)
+)
 
 # by default, smelli uses leading log accuracy for SMEFT running!
 Wilson.set_default_option('smeft_accuracy', 'leadinglog')
@@ -205,9 +210,11 @@ class GlobalLikelihood(object):
                     meas_loaded = set(L.full_measurement_likelihood.get_measurements)
                     meas_missing = meas_yaml-meas_loaded
                 except AssertionError as e:
-                    raise AssertionError('{0}. If your flavio version is below v{1}, please update flavio. If your flavio version is above v{1}, please update smelli.'.format(e,__flavio__version__))
+                    to_upgrade = 'smelli' if _flavio_up_to_date else 'flavio'
+                    raise AssertionError('{}. Please upgrade {} to the latest version.'.format(e,to_upgrade))
                 if meas_missing:
-                    raise AssertionError('The measurements {0} have not been found. If your flavio version is below v{1}, please update flavio. If your flavio version is above v{1}, please update smelli.'.format(meas_missing,__flavio__version__))
+                    to_upgrade = 'smelli' if _flavio_up_to_date else 'flavio'
+                    raise AssertionError('The measurements {} have not been found. Please upgrade {} to the latest version.'.format(meas_missing,to_upgrade))
             self.fast_likelihoods[fn] = L
         for fn in self._likelihoods_yaml:
             if include_likelihoods is not None and fn not in include_likelihoods:
@@ -227,9 +234,11 @@ class GlobalLikelihood(object):
                     meas_loaded = set(L.measurement_likelihood.get_measurements)
                     meas_missing = meas_yaml-meas_loaded
                 except AssertionError as e:
-                    raise AssertionError('{0}. If your flavio version is below v{1}, please update flavio. If your flavio version is above v{1}, please update smelli.'.format(e,__flavio__version__))
+                    to_upgrade = 'smelli' if _flavio_up_to_date else 'flavio'
+                    raise AssertionError('{}. Please upgrade {} to the latest version.'.format(e,to_upgrade))
                 if meas_missing:
-                    raise AssertionError('The measurements {0} have not been found. If your flavio version is below v{1}, please update flavio. If your flavio version is above v{1}, please update smelli.'.format(meas_missing,__flavio__version__))
+                    to_upgrade = 'smelli' if _flavio_up_to_date else 'flavio'
+                    raise AssertionError('The measurements {} have not been found. Please upgrade {} to the latest version.'.format(meas_missing,to_upgrade))
             self.likelihoods[fn] = L
         for name, observables in self._custom_likelihoods_dict.items():
             L = CustomLikelihood(self, observables)
