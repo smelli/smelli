@@ -2,6 +2,7 @@
 - BR(B0->K*gamma)
 - BR(B->Xsgamma)
 - ACP(B->Xgamma)
+- BR(B0->K*gamma)/BR(Bs->phigamma)
 - BR(Bs->phigamma)
 - ADeltaGamma(Bs->phigamma)
 - S_phigamma
