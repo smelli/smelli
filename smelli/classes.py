@@ -549,25 +549,28 @@ class GlobalLikelihood(object):
 
         Parameters:
 
-        - `wc_fct`: function with n>=1 arguments or a single array of lenth n>1
-          returning a dictionary with Wilson coefficients.
-        - `scale`: either a function with n>=1 arguments or a single array of
-          lenth n>1 returning the renormalization scale in GeV, or a numerical
-          value fixing the scale.
+        - `wc_fct`: function with either n>=1 arguments or one argument being
+          an array of length n>1 and which returns a dictionary with Wilson
+          coefficients.
+        - `scale`: either a function returning the renormalization scale in GeV,
+          or a numerical value fixing the scale. If it is a function, it must
+          have either n>=1 arguments or one argument being an array of length
+          n>1.
         - methods: tuple of methods to try consecutively. (default:
           `('L-BFGS-B', 'SLSQP', 'MIGRAD')`)
         - include_likelihoods: a list of strings specifying the likelihoods
           to be included (default: all of them).
         - exclude_likelihoods: a list of strings specifying the likelihoods to
           be excluded (default: none of them).
-        - `plotdata`: the result of `plot_data_2d` for extracting the initial
-          guesses for the minimization in the 2D case (default: None)
+        - `plotdata`: the result of `plot_data_2d` that will be used for
+          extracting the initial guesses for the minimization in the 2D case
+          (default: None)
         - `initial_guesses`: a dictionary with initial guesses for the
           minimization. The keys are strings with the names of the individual
           likelihoods, the values are arrays (or lists) of length n. This
           overrides initial guesses extracted from `plotdata` (default: None)
         - `n`: number of variables. Has to be provided only if `wc_fct` has a
-           single argument (an array of lenth n) and neither `plotdata` nor
+           single argument (an array of length n) and neither `plotdata` nor
           `initial_guesses` is given. (default: None)
         - `threads`: number of threads for parallel computation (default: 1)
         - `pool`: either `None` or `pool` object for parallel computation. If
@@ -581,7 +584,7 @@ class GlobalLikelihood(object):
         likelihoods (as return by `GlobalLikelihoodPoint.log_likelihood_dict`)
         and `dat_A` etc. are dictionaries with the keys `z_min`, `coords_min`,
         where the values of `z_min` and `coords_min` are a number and an array
-        of lenth n, respectively.
+        of length n, respectively.
         """
         if include_likelihoods is not None and exclude_likelihoods is not None:
             raise ValueError("include_likelihoods and exclude_likelihoods "
@@ -603,14 +606,12 @@ class GlobalLikelihood(object):
                 x,y,z = (plotdata[k][i] for i in 'xyz')
                 minimum = (z == np.min(z))
                 _initial_guesses[k] = [np.median(x[minimum]), np.median(y[minimum])]
-            # check for inconsistencies
             if initial_guesses is not None:
                 _initial_guesses.update(initial_guesses)
         elif initial_guesses is not None:
             n_ig = len(next(iter(initial_guesses.values())))
             _initial_guesses = {k: np.zeros(n_ig) for k in likelihoods}
             _initial_guesses.update(initial_guesses)
-            # check for inconsistencies
         elif n_fct > 1:
             _initial_guesses = {k: np.zeros(n_fct) for k in likelihoods}
         elif n is not None:
@@ -618,7 +619,7 @@ class GlobalLikelihood(object):
         else:
             raise Exception(
                 'The number of variables `n` has to be provided as an argument '
-                'if `wc_fct` has a single argument (an array of lenth n) and '
+                'if `wc_fct` has a single argument (an array of length n) and '
                 'neither `plotdata` nor `initial_guesses` is given.'
               )
         _initial_guesses = list(_initial_guesses.items())
@@ -634,7 +635,6 @@ class GlobalLikelihood(object):
             threads=threads, pool=pool)
         bf_dict = dict(list(bf_list))
         return bf_dict
-
 
 
 def _scale_fct_fixed(*args, scale=0):
