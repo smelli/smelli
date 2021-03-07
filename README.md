@@ -15,7 +15,7 @@ and matching of Wilson coefficients.
 
 ## Installation
 
-The package requires Python version 3.5 or above. It can be installed with
+The package requires Python version 3.6 or above. It can be installed with
 
 ```bash
 python3 -m pip install smelli --user
