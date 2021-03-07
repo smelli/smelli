@@ -13,6 +13,7 @@ observables: !include_merge_list
   - observables_bsgamma.yaml
   - observables_bsphimumu.yaml
   - observables_xsee.yaml
+  - observables_bkstaree_lhcb.yaml
   # b->ulnu
   - observables_bulnu_lfu.yaml
   # DF=2

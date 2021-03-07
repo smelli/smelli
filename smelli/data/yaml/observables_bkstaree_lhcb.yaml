@@ -1,0 +1,12 @@
+- name: <P2>(B0->K*ee)
+  q2min: 0.000784
+  q2max: 0.257
+- name: <FL>(B0->K*ee)
+  q2min: 0.000784
+  q2max: 0.257
+- name: <P1>(B0->K*ee)
+  q2min: 0.000784
+  q2max: 0.257
+- name: <ATIm>(B0->K*ee)
+  q2min: 0.000784
+  q2max: 0.257
