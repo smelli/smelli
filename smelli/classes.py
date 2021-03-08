@@ -557,7 +557,7 @@ class GlobalLikelihood(object):
           have either n>=1 arguments or one argument being an array of length
           n>1.
         - methods: tuple of methods to try consecutively. (default:
-          `('L-BFGS-B', 'SLSQP', 'MIGRAD')`)
+          `('SLSQP', 'MIGRAD', 'L-BFGS-B')`)
         - include_likelihoods: a list of strings specifying the likelihoods
           to be included (default: all of them).
         - exclude_likelihoods: a list of strings specifying the likelihoods to
@@ -601,7 +601,11 @@ class GlobalLikelihood(object):
         }
         n_fct = len(inspect.getfullargspec(wc_fct).args)
         if plotdata is not None:
-            _initial_guesses = {k: np.zeros(2) for k in likelihoods}
+            n_args = 2
+            if n is not None:
+                warnings.warn(f"Since `plotdata` is provided, `n={n}` "
+                              " is ignored.")
+            _initial_guesses = {k: np.zeros(n_args) for k in likelihoods}
             for k in _initial_guesses.keys():
                 x,y,z = (plotdata[k][i] for i in 'xyz')
                 minimum = (z == np.min(z))
@@ -609,29 +613,40 @@ class GlobalLikelihood(object):
             if initial_guesses is not None:
                 _initial_guesses.update(initial_guesses)
         elif initial_guesses is not None:
-            n_ig = len(next(iter(initial_guesses.values())))
-            _initial_guesses = {k: np.zeros(n_ig) for k in likelihoods}
+            if n is not None:
+                warnings.warn(f"Since `initial_guesses` is provided, `n={n}` "
+                              " is ignored.")
+            n_args = len(next(iter(initial_guesses.values())))
+            _initial_guesses = {k: np.zeros(n_args) for k in likelihoods}
             _initial_guesses.update(initial_guesses)
         elif n_fct > 1:
-            _initial_guesses = {k: np.zeros(n_fct) for k in likelihoods}
+            n_args = n_fct
+            if n is not None:
+                warnings.warn(f"Since `wc_fct` has {n_fct} arguments, `n={n}` "
+                              " is ignored.")
+            _initial_guesses = {k: np.zeros(n_args) for k in likelihoods}
         elif n is not None:
-            _initial_guesses = {k: np.zeros(n) for k in likelihoods}
+            n_args = n
+            _initial_guesses = {k: np.zeros(n_args) for k in likelihoods}
         else:
-            raise Exception(
+            raise ValueError(
                 'The number of variables `n` has to be provided as an argument '
-                'if `wc_fct` has a single argument (an array of length n) and '
-                'neither `plotdata` nor `initial_guesses` is given.'
-              )
+                'if `wc_fct` has a single argument (which can be an array of '
+                'length n) and neither `plotdata` nor `initial_guesses` is '
+                'given.'
+            )
         _initial_guesses = list(_initial_guesses.items())
 
+        array_input = n_args != n_fct
         best_fit_point = partial(
             _best_fit_point,
             gl=self,
             wc_fct=wc_fct,
             scale_fct=scale_fct,
+            array_input=array_input,
             methods=methods,
         )
-        bf_list = multithreading(best_fit_point, _initial_guesses,
+        bf_list = multithreading_map(best_fit_point, _initial_guesses,
             threads=threads, pool=pool)
         bf_dict = dict(list(bf_list))
         return bf_dict
@@ -655,31 +670,21 @@ def _log_likelihood_2d(xy_enumerated, gl, wc_fct, scale_fct):
     ll_dict = pp.log_likelihood_dict()
     return (number, ll_dict)
 
-def _chi2(x, gl, llh, llh_name, wc_fct, scale_fct):
-    try:
-        w = gl.get_wilson(wc_fct(*x), scale_fct(*x))
-    except:
-        w = gl.get_wilson(wc_fct(x), scale_fct(x))
-    llh_sm = (0 if llh_name == 'global' else
-              gl.log_likelihood_sm[llh_name])
-    gp = gl.parameter_point(w)
-    return -2*(llh.log_likelihood(gp.par_dict_np, w, delta=True)-llh_sm)
-
-def _best_fit_point(initial_guess, gl, wc_fct, scale_fct, methods):
+def _best_fit_point(initial_guess, gl, wc_fct, scale_fct, array_input, methods):
     llh_name, x0 = initial_guess
     llh = (gl.fast_likelihoods.get(llh_name)
            or gl.likelihoods.get(llh_name)
            or gl.custom_likelihoods.get(llh_name)
            or (_global_llh(gl) if llh_name == 'global' else None))
     llh_sm = (0 if llh_name == 'global' else gl.log_likelihood_sm[llh_name])
-    if len(inspect.getfullargspec(wc_fct).args) == len(x0):
+    if array_input:
         def chi2(x):
-            w = gl.get_wilson(wc_fct(*x), scale_fct(*x))
+            w = gl.get_wilson(wc_fct(x), scale_fct(x))
             gp = gl.parameter_point(w)
             return -2*(llh.log_likelihood(gp.par_dict_np, w, delta=True)-llh_sm)
     else:
         def chi2(x):
-            w = gl.get_wilson(wc_fct(x), scale_fct(x))
+            w = gl.get_wilson(wc_fct(*x), scale_fct(*x))
             gp = gl.parameter_point(w)
             return -2*(llh.log_likelihood(gp.par_dict_np, w, delta=True)-llh_sm)
     try:
