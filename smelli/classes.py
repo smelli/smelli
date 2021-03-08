@@ -16,6 +16,8 @@ import os
 from functools import partial
 from operator import itemgetter
 from numbers import Number
+import inspect
+from flavio.math.optimize import minimize_robust
 
 
 # by default, smelli uses leading log accuracy for SMEFT running!
@@ -147,6 +149,12 @@ class GlobalLikelihood(object):
         self.custom_likelihoods = {}
         self._load_likelihoods(include_likelihoods=include_likelihoods,
                                exclude_likelihoods=exclude_likelihoods)
+        self._all_likelihoods = {
+            'global': _global_llh(self),
+            **self.fast_likelihoods,
+            **self.likelihoods,
+            **self.custom_likelihoods,
+        }
         self._Nexp = Nexp
         if exp_cov_folder is not None:
             self.load_exp_covariances(exp_cov_folder)
@@ -525,7 +533,126 @@ class GlobalLikelihood(object):
             plotdata[k] = {'x': x, 'y': y, 'z': z}
         return plotdata
 
-def _scale_fct_fixed(x, y, scale):
+    def chi2_min(self,
+                 wc_fct,
+                 scale,
+                 methods = ('SLSQP', 'MIGRAD', 'L-BFGS-B'),
+                 include_likelihoods=None,
+                 exclude_likelihoods=None,
+                 plotdata=None,
+                 initial_guesses=None,
+                 n=None,
+                 threads=1,
+                 pool=None):
+        """Find the minimum of -2*log-likelihood for a given function of Wilson
+           coefficients and a scale.
+
+        Parameters:
+
+        - `wc_fct`: function with either n>=1 arguments or one argument being
+          an array of length n>1 and which returns a dictionary with Wilson
+          coefficients.
+        - `scale`: either a function returning the renormalization scale in GeV,
+          or a numerical value fixing the scale. If it is a function, it must
+          have either n>=1 arguments or one argument being an array of length
+          n>1.
+        - methods: tuple of methods to try consecutively. (default:
+          `('SLSQP', 'MIGRAD', 'L-BFGS-B')`)
+        - include_likelihoods: a list of strings specifying the likelihoods
+          to be included (default: all of them).
+        - exclude_likelihoods: a list of strings specifying the likelihoods to
+          be excluded (default: none of them).
+        - `plotdata`: the result of `plot_data_2d` that will be used for
+          extracting the initial guesses for the minimization in the 2D case
+          (default: None)
+        - `initial_guesses`: a dictionary with initial guesses for the
+          minimization. The keys are strings with the names of the individual
+          likelihoods, the values are arrays (or lists) of length n. This
+          overrides initial guesses extracted from `plotdata` (default: None)
+        - `n`: number of variables. Has to be provided only if `wc_fct` has a
+           single argument (an array of length n) and neither `plotdata` nor
+          `initial_guesses` is given. (default: None)
+        - `threads`: number of threads for parallel computation (default: 1)
+        - `pool`: either `None` or `pool` object for parallel computation. If
+          `pool` object is provided, `threads` is ignored. (default: None)
+
+        Returns:
+
+        A dictionary of the  form
+        `{'likelihood_A': dat_A, 'likelihood_B': dat_B, ...}`
+        where `'likelihood_A'` etc. are the names of the sub- and custom
+        likelihoods (as return by `GlobalLikelihoodPoint.log_likelihood_dict`)
+        and `dat_A` etc. are dictionaries with the keys `z_min`, `coords_min`,
+        where the values of `z_min` and `coords_min` are a number and an array
+        of length n, respectively.
+        """
+        if include_likelihoods is not None and exclude_likelihoods is not None:
+            raise ValueError("include_likelihoods and exclude_likelihoods "
+                             "should not be specified simultaneously.")
+        if isinstance(scale,Number):
+            scale_fct = partial(_scale_fct_fixed, scale=scale)
+        else:
+            scale_fct = scale
+        likelihoods = {
+            k for k in self._all_likelihoods.keys()
+            if ((include_likelihoods is None and exclude_likelihoods is None)
+            or (include_likelihoods is not None and k in include_likelihoods)
+            or (exclude_likelihoods is not None and k not in exclude_likelihoods))
+        }
+        n_fct = len(inspect.getfullargspec(wc_fct).args)
+        if plotdata is not None:
+            n_args = 2
+            if n is not None:
+                warnings.warn(f"Since `plotdata` is provided, `n={n}` "
+                              " is ignored.")
+            _initial_guesses = {k: np.zeros(n_args) for k in likelihoods}
+            for k in _initial_guesses.keys():
+                x,y,z = (plotdata[k][i] for i in 'xyz')
+                minimum = (z == np.min(z))
+                _initial_guesses[k] = [np.median(x[minimum]), np.median(y[minimum])]
+            if initial_guesses is not None:
+                _initial_guesses.update(initial_guesses)
+        elif initial_guesses is not None:
+            if n is not None:
+                warnings.warn(f"Since `initial_guesses` is provided, `n={n}` "
+                              " is ignored.")
+            n_args = len(next(iter(initial_guesses.values())))
+            _initial_guesses = {k: np.zeros(n_args) for k in likelihoods}
+            _initial_guesses.update(initial_guesses)
+        elif n_fct > 1:
+            n_args = n_fct
+            if n is not None:
+                warnings.warn(f"Since `wc_fct` has {n_fct} arguments, `n={n}` "
+                              " is ignored.")
+            _initial_guesses = {k: np.zeros(n_args) for k in likelihoods}
+        elif n is not None:
+            n_args = n
+            _initial_guesses = {k: np.zeros(n_args) for k in likelihoods}
+        else:
+            raise ValueError(
+                'The number of variables `n` has to be provided as an argument '
+                'if `wc_fct` has a single argument (which can be an array of '
+                'length n) and neither `plotdata` nor `initial_guesses` is '
+                'given.'
+            )
+        _initial_guesses = list(_initial_guesses.items())
+
+        array_input = n_args != n_fct
+        best_fit_point = partial(
+            _best_fit_point,
+            gl=self,
+            wc_fct=wc_fct,
+            scale_fct=scale_fct,
+            array_input=array_input,
+            methods=methods,
+        )
+        bf_list = multithreading_map(best_fit_point, _initial_guesses,
+            threads=threads, pool=pool)
+        bf_dict = dict(list(bf_list))
+        return bf_dict
+
+
+def _scale_fct_fixed(*args, scale=0):
     """
     This is a helper function that is necessary because multiprocessing requires
     a picklable (i.e. top-level) object for parallel computation.
@@ -542,6 +669,48 @@ def _log_likelihood_2d(xy_enumerated, gl, wc_fct, scale_fct):
     pp = gl.parameter_point(wc_fct(x, y), scale_fct(x, y))
     ll_dict = pp.log_likelihood_dict()
     return (number, ll_dict)
+
+def _best_fit_point(initial_guess, gl, wc_fct, scale_fct, array_input, methods):
+    llh_name, x0 = initial_guess
+    llh = (gl.fast_likelihoods.get(llh_name)
+           or gl.likelihoods.get(llh_name)
+           or gl.custom_likelihoods.get(llh_name)
+           or (_global_llh(gl) if llh_name == 'global' else None))
+    llh_sm = (0 if llh_name == 'global' else gl.log_likelihood_sm[llh_name])
+    if array_input:
+        def chi2(x):
+            w = gl.get_wilson(wc_fct(x), scale_fct(x))
+            gp = gl.parameter_point(w)
+            return -2*(llh.log_likelihood(gp.par_dict_np, w, delta=True)-llh_sm)
+    else:
+        def chi2(x):
+            w = gl.get_wilson(wc_fct(*x), scale_fct(*x))
+            gp = gl.parameter_point(w)
+            return -2*(llh.log_likelihood(gp.par_dict_np, w, delta=True)-llh_sm)
+    try:
+        res = minimize_robust(chi2, x0, methods=methods)
+        if not res.success:
+            x = [np.nan]*len(x0)
+            z = np.nan
+            warnings.warn("Optimization failed during computation of best-fit point of {}: {}"
+            ''.format(llh_name, res.message))
+        else:
+            x = res.x
+            z = res.fun
+    except Exception as e:
+        x = [np.nan]*len(x0)
+        z = np.nan
+        warnings.warn('\nERROR during computation of best-fit point of {}:\n{}'
+                      ''.format(llh_name,e))
+    return (llh_name, {'coords_min':np.array(x), 'z_min':z})
+
+
+class _global_llh(object):
+    def __init__(self, gl):
+        self.gl = gl
+    def log_likelihood(self, par_dict, w, delta):
+        gp = self.gl.parameter_point(w)
+        return gp.log_likelihood_global()
 
 
 class CustomLikelihood(object):

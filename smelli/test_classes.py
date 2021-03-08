@@ -56,6 +56,119 @@ class TestGlobalLikelihood(unittest.TestCase):
         self.assertRaises(ValueError, GlobalLikelihood, include_likelihoods=["nonexistent_likelihood.yaml"])
         self.assertRaises(ValueError, GlobalLikelihood, exclude_likelihoods=["nonexistent_likelihood.yaml"])
 
+    def test_chi2_min(self):
+        gl_ewpt = GlobalLikelihood(fix_ckm=True, include_likelihoods=[
+            'likelihood_ewpt.yaml',
+        ])
+        def wc_fct_2D_2args(S,T):
+            return {
+                'phiWB': S * 7.643950529889027e-08,
+                'phiD': -T * 2.5793722852276787e-07,
+            }
+        def wc_fct_2D_1arg(x):
+            S,T = x
+            return {
+                'phiWB': S * 7.643950529889027e-08,
+                'phiD': -T * 2.5793722852276787e-07,
+            }
+        def wc_fct_1D(S):
+            return {
+                'phiWB': S * 7.643950529889027e-08,
+            }
+        min_data_2D_2args = gl_ewpt.chi2_min(
+            wc_fct_2D_2args,
+            91.1876
+        )
+        min_data_2D_1arg = gl_ewpt.chi2_min(
+            wc_fct_2D_1arg,
+            91.1876,
+            n=2
+        )
+        min_data_1D = gl_ewpt.chi2_min(
+            wc_fct_1D,
+            91.1876,
+            n=1
+        )
+        self.assertEqual(len(min_data_1D['global']['coords_min']), 1)
+        self.assertEqual(len(min_data_2D_2args['global']['coords_min']), 2)
+        self.assertEqual(
+            len(min_data_1D['likelihood_ewpt.yaml']['coords_min']),
+            1
+        )
+        self.assertEqual(
+            len(min_data_2D_2args['likelihood_ewpt.yaml']['coords_min']),
+            2
+        )
+        self.assertEqual(
+            min_data_2D_2args['global']['z_min'],
+            min_data_2D_1arg['global']['z_min'],
+        )
+        self.assertTrue(all(
+            min_data_2D_2args['global']['coords_min']
+            ==
+            min_data_2D_1arg['global']['coords_min']
+        ))
+        self.assertEqual(
+            min_data_2D_2args['likelihood_ewpt.yaml']['z_min'],
+            min_data_2D_1arg['likelihood_ewpt.yaml']['z_min'],
+        )
+        self.assertTrue(all(
+            min_data_2D_2args['likelihood_ewpt.yaml']['coords_min']
+            ==
+            min_data_2D_1arg['likelihood_ewpt.yaml']['coords_min']
+        ))
+        with self.assertWarns(UserWarning):
+            gl_ewpt.chi2_min(
+                wc_fct_2D_2args,
+                91.1876,
+                n=2
+            )
+        with self.assertRaises(ValueError):
+            gl_ewpt.chi2_min(
+                wc_fct_1D,
+                91.1876,
+            )
+        with self.assertRaises(ValueError):
+            gl_ewpt.chi2_min(
+                wc_fct_2D_1arg,
+                91.1876,
+            )
+        # define a global function for multiprocessing
+        global _wc_fct_2D_2args
+        def _wc_fct_2D_2args(S,T):
+            return {
+                'phiWB': S * 7.643950529889027e-08,
+                'phiD': -T * 2.5793722852276787e-07,
+            }
+        min_data_2D_2threads = gl_ewpt.chi2_min(
+            _wc_fct_2D_2args,
+            91.1876,
+            threads=2,
+        )
+        self.assertEqual(len(min_data_2D_2threads['global']['coords_min']), 2)
+        self.assertEqual(
+            len(min_data_2D_2threads['likelihood_ewpt.yaml']['coords_min']),
+            2
+        )
+        self.assertEqual(
+            min_data_2D_2threads['global']['z_min'],
+            min_data_2D_2args['global']['z_min'],
+        )
+        self.assertEqual(
+            min_data_2D_2threads['likelihood_ewpt.yaml']['z_min'],
+            min_data_2D_2args['likelihood_ewpt.yaml']['z_min'],
+        )
+        self.assertTrue(all(
+            min_data_2D_2threads['global']['coords_min']
+            ==
+            min_data_2D_2args['global']['coords_min']
+        ))
+        self.assertTrue(all(
+            min_data_2D_2threads['likelihood_ewpt.yaml']['coords_min']
+            ==
+            min_data_2D_2args['likelihood_ewpt.yaml']['coords_min']
+        ))
+
 
 class TestGlobalLikelihoodPoint(unittest.TestCase):
 
