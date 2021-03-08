@@ -1,2 +1,4 @@
 observables:
   - R_trident
+include_measurements: !include_merge_list
+  - measurements_lept.yaml

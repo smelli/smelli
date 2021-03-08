@@ -18,6 +18,7 @@ from operator import itemgetter
 from numbers import Number
 import inspect
 from flavio.math.optimize import minimize_robust
+from smelli import _flavio_up_to_date
 
 
 # by default, smelli uses leading log accuracy for SMEFT running!
@@ -198,7 +199,17 @@ class GlobalLikelihood(object):
                 yaml_dict = flavio.io.yaml.load_include(f)
                 if not self.fix_ckm:
                     yaml_dict['par_obj'] = par_ckm_dict
-                L = FastLikelihood.load_dict(yaml_dict)
+                try:
+                    L = FastLikelihood.load_dict(yaml_dict)
+                    meas_yaml = set(yaml_dict['include_measurements'])
+                    meas_loaded = set(L.full_measurement_likelihood.get_measurements)
+                    meas_missing = meas_yaml-meas_loaded
+                except AssertionError as e:
+                    to_upgrade = 'smelli' if _flavio_up_to_date else 'flavio'
+                    raise AssertionError('{}. Please upgrade {} to the latest version.'.format(e,to_upgrade))
+                if meas_missing:
+                    to_upgrade = 'smelli' if _flavio_up_to_date else 'flavio'
+                    raise AssertionError('The measurements {} have not been found. Please upgrade {} to the latest version.'.format(meas_missing,to_upgrade))
             self.fast_likelihoods[fn] = L
         for fn in self._likelihoods_yaml:
             if include_likelihoods is not None and fn not in include_likelihoods:
@@ -211,7 +222,18 @@ class GlobalLikelihood(object):
                                               'likelihood_higgs.yaml',]:
                 continue
             with open(self._get_yaml_path(fn), 'r') as f:
-                L = Likelihood.load(f)
+                yaml_dict = flavio.io.yaml.load_include(f)
+                try:
+                    L = Likelihood.load_dict(yaml_dict)
+                    meas_yaml = set(yaml_dict['include_measurements'])
+                    meas_loaded = set(L.measurement_likelihood.get_measurements)
+                    meas_missing = meas_yaml-meas_loaded
+                except AssertionError as e:
+                    to_upgrade = 'smelli' if _flavio_up_to_date else 'flavio'
+                    raise AssertionError('{}. Please upgrade {} to the latest version.'.format(e,to_upgrade))
+                if meas_missing:
+                    to_upgrade = 'smelli' if _flavio_up_to_date else 'flavio'
+                    raise AssertionError('The measurements {} have not been found. Please upgrade {} to the latest version.'.format(meas_missing,to_upgrade))
             self.likelihoods[fn] = L
         for name, observables in self._custom_likelihoods_dict.items():
             L = CustomLikelihood(self, observables)

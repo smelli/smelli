@@ -5,3 +5,5 @@ observables: !include_merge_list
   - observables_bkstarll_lfu.yaml
   # b->qtautau
   - observables_bqtautau.yaml
+include_measurements: !include_merge_list
+  - measurements_lfu_fcnc.yaml

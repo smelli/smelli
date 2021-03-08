@@ -3,3 +3,5 @@ observables: !include_merge_list
   - observables_rd.yaml
   # RD*
   - observables_rds.yaml
+include_measurements: !include_merge_list
+  - measurements_rd_rds.yaml

@@ -1,3 +1,5 @@
 observables: !include_merge_list
   # Z->ll'
   - observables_zlfv.yaml
+include_measurements: !include_merge_list
+  - measurements_zlfv.yaml

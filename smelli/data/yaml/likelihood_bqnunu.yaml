@@ -1,3 +1,5 @@
 observables: !include_merge_list
   # b->qnunu
   - observables_bqnunu.yaml
+include_measurements: !include_merge_list
+  - measurements_bqnunu.yaml
