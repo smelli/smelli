@@ -18,13 +18,8 @@ from operator import itemgetter
 from numbers import Number
 import inspect
 from flavio.math.optimize import minimize_robust
-from smelli import __flavio__version__
-from pkg_resources import packaging
+from smelli import _flavio_up_to_date
 
-_flavio_up_to_date = (
-    packaging.version.parse(flavio.__version__)
-    >= packaging.version.parse(__flavio__version__)
-)
 
 # by default, smelli uses leading log accuracy for SMEFT running!
 Wilson.set_default_option('smeft_accuracy', 'leadinglog')
