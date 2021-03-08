@@ -2,6 +2,7 @@
 - ATLAS B->K*mumu 2017 P1
 - ATLAS B->K*mumu 2017 P4p
 - ATLAS B->K*mumu 2017 P5p
+- ATLAS CMS LHCb combination Bs->mumu 2020 Gaussian
 - B->Xgamma WA 2017
 - BaBar B->Xll 2013
 - Belle B0->pitaunu 2015 total BR
@@ -31,9 +32,13 @@
 - K+->pinunu E949 2009
 - K+->pinunu NA62 2019
 - KL->pinunu KOTO 2018
+- LHCb B+->K*mumu 2020 P 1.1-2.5
+- LHCb B+->K*mumu 2020 P 15-19
+- LHCb B+->K*mumu 2020 P 2.5-4
+- LHCb B+->K*mumu 2020 P 4-6
 - LHCb B+->K*mumu BR 2014
 - LHCb B+->Kmumu BR 2014
-- LHCb B->K*ee 2013
+- LHCb B->K*ee 2020
 - LHCb B->K*mumu 2020 P 1.1-2.5
 - LHCb B->K*mumu 2020 P 15-19
 - LHCb B->K*mumu 2020 P 2.5-4
@@ -60,5 +65,4 @@
 - PDG epsp/eps
 - PDG kaon CPV
 - aCORN atilde_n 2017
-- inofficial combination Bs->mumu 2019 CMS19
 - nTRV R_n 2011
