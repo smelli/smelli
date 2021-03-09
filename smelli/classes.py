@@ -703,12 +703,34 @@ def _best_fit_point(initial_guess, gl, wc_fct, scale_fct, array_input, methods):
         def chi2(x):
             w = gl.get_wilson(wc_fct(x), scale_fct(x))
             gp = gl.parameter_point(w)
-            return -2*(llh.log_likelihood(gp.par_dict_np, w, delta=True)-llh_sm)
+            try:
+                res = -2*(llh.log_likelihood(gp.par_dict_np, w, delta=True)-llh_sm)
+            except ValueError as e:
+                if (
+                    'The extraction of CKM elements failed.' in str(e)
+                    or
+                    'math domain error' in str(e)
+                ):
+                    res = np.inf
+                else:
+                    raise
+            return res
     else:
         def chi2(x):
             w = gl.get_wilson(wc_fct(*x), scale_fct(*x))
             gp = gl.parameter_point(w)
-            return -2*(llh.log_likelihood(gp.par_dict_np, w, delta=True)-llh_sm)
+            try:
+                res = -2*(llh.log_likelihood(gp.par_dict_np, w, delta=True)-llh_sm)
+            except ValueError as e:
+                if (
+                    'The extraction of CKM elements failed.' in str(e)
+                    or
+                    'math domain error' in str(e)
+                ):
+                    res = np.inf
+                else:
+                    raise
+            return res
     try:
         res = minimize_robust(chi2, x0, methods=methods)
         if not res.success:
