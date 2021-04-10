@@ -3,7 +3,7 @@ observables: !include_merge_list
   - observables_blfv.yaml
   # s->dll'
   - observables_klfv.yaml
-  # LFV
+  # l->l'X and mu-e conversion on nuclei
   - observables_lfv.yaml
 include_measurements: !include_merge_list
   - measurements_lfv.yaml
