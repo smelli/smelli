@@ -1,15 +1,6 @@
-- name: <P2>(B+->K*mumu)
-  q2min: 1.1
-  q2max: 2.5
-- name: <P2>(B+->K*mumu)
-  q2min: 2.5
-  q2max: 4
-- name: <P2>(B+->K*mumu)
-  q2min: 4
-  q2max: 6
-- name: <P2>(B+->K*mumu)
-  q2min: 15
-  q2max: 19
+- name: <FL>(B+->K*mumu)
+  q2min: 0.1
+  q2max: 0.98
 - name: <FL>(B+->K*mumu)
   q2min: 1.1
   q2max: 2.5
@@ -23,6 +14,9 @@
   q2min: 15
   q2max: 19
 - name: <P1>(B+->K*mumu)
+  q2min: 0.1
+  q2max: 0.98
+- name: <P1>(B+->K*mumu)
   q2min: 1.1
   q2max: 2.5
 - name: <P1>(B+->K*mumu)
@@ -34,6 +28,39 @@
 - name: <P1>(B+->K*mumu)
   q2min: 15
   q2max: 19
+- name: <P2>(B+->K*mumu)
+  q2min: 0.1
+  q2max: 0.98
+- name: <P2>(B+->K*mumu)
+  q2min: 1.1
+  q2max: 2.5
+- name: <P2>(B+->K*mumu)
+  q2min: 2.5
+  q2max: 4
+- name: <P2>(B+->K*mumu)
+  q2min: 4
+  q2max: 6
+- name: <P2>(B+->K*mumu)
+  q2min: 15
+  q2max: 19
+- name: <P3>(B+->K*mumu)
+  q2min: 0.1
+  q2max: 0.98
+- name: <P3>(B+->K*mumu)
+  q2min: 1.1
+  q2max: 2.5
+- name: <P3>(B+->K*mumu)
+  q2min: 2.5
+  q2max: 4
+- name: <P3>(B+->K*mumu)
+  q2min: 4
+  q2max: 6
+- name: <P3>(B+->K*mumu)
+  q2min: 15
+  q2max: 19
+- name: <P4p>(B+->K*mumu)
+  q2min: 0.1
+  q2max: 0.98
 - name: <P4p>(B+->K*mumu)
   q2min: 1.1
   q2max: 2.5
@@ -47,6 +74,9 @@
   q2min: 15
   q2max: 19
 - name: <P5p>(B+->K*mumu)
+  q2min: 0.1
+  q2max: 0.98
+- name: <P5p>(B+->K*mumu)
   q2min: 1.1
   q2max: 2.5
 - name: <P5p>(B+->K*mumu)
@@ -56,5 +86,35 @@
   q2min: 4
   q2max: 6
 - name: <P5p>(B+->K*mumu)
+  q2min: 15
+  q2max: 19
+- name: <P6p>(B+->K*mumu)
+  q2min: 0.1
+  q2max: 0.98
+- name: <P6p>(B+->K*mumu)
+  q2min: 1.1
+  q2max: 2.5
+- name: <P6p>(B+->K*mumu)
+  q2min: 2.5
+  q2max: 4
+- name: <P6p>(B+->K*mumu)
+  q2min: 4
+  q2max: 6
+- name: <P6p>(B+->K*mumu)
+  q2min: 15
+  q2max: 19
+- name: <P8p>(B+->K*mumu)
+  q2min: 0.1
+  q2max: 0.98
+- name: <P8p>(B+->K*mumu)
+  q2min: 1.1
+  q2max: 2.5
+- name: <P8p>(B+->K*mumu)
+  q2min: 2.5
+  q2max: 4
+- name: <P8p>(B+->K*mumu)
+  q2min: 4
+  q2max: 6
+- name: <P8p>(B+->K*mumu)
   q2min: 15
   q2max: 19
