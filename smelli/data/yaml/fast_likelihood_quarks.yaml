@@ -10,6 +10,7 @@ observables: !include_merge_list
   - observables_lambdablambdall_br.yaml
   - observables_lambdablambdall_afb.yaml
   - observables_bsmumu.yaml
+  - observables_bsee.yaml
   - observables_bsgamma.yaml
   - observables_bsphimumu.yaml
   - observables_xsee.yaml
