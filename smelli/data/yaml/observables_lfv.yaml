@@ -12,3 +12,5 @@
 - BR(tau->rhomu)
 - BR(tau->phie)
 - BR(tau->phimu)
+- CR(mu->e, Ti)
+- CR(mu->e, Au)
