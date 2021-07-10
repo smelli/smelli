@@ -20,9 +20,6 @@
   q2min: 15.0
   q2max: 19.0
 - name: <dBR/dq2>(Bs->phimumu)
-  q2min: 0.1
-  q2max: 0.98
-- name: <dBR/dq2>(Bs->phimumu)
   q2min: 1.1
   q2max: 2.5
 - name: <dBR/dq2>(Bs->phimumu)
