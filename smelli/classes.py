@@ -238,8 +238,6 @@ class GlobalLikelihood(object):
                     raise AssertionError('The measurements {} have not been found. Please upgrade {} to the latest version.'.format(meas_missing,to_upgrade))
             self.likelihoods[fn] = L
         for name, observables in self._custom_likelihoods_dict.items():
-            if set(observables) - self.observables:
-                raise ValueError('The following observables are not part of any inlcuded (fast)likelihood and thus cannot be used in a custom likelihood: {}.'.format(', '.join(str(obs) for obs in set(observables) - self.observables)))
             L = CustomLikelihood(self, observables)
             self.custom_likelihoods['custom_' + name] = L
 
@@ -774,8 +772,10 @@ class _global_llh(object):
 
 class CustomLikelihood(object):
     def __init__(self, likelihood, observables):
+        if set(observables) - likelihood.observables:
+            raise ValueError('The following observables are not part of any inlcuded (fast)likelihood and thus cannot be used in a custom likelihood: {}.'.format(', '.join(str(obs) for obs in set(observables) - likelihood.observables)))
         self.likelihood = likelihood
-        self.observables = observables
+        self.observables = list(set(observables))
         self.exclude_obs = self._get_exclude_obs_dict()
 
     def _get_exclude_obs_dict(self):
