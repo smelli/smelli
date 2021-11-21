@@ -19,6 +19,7 @@ from numbers import Number
 import inspect
 from flavio.math.optimize import minimize_robust
 from smelli import _flavio_up_to_date
+from itertools import chain
 
 
 # by default, smelli uses leading log accuracy for SMEFT running!
@@ -136,6 +137,7 @@ class GlobalLikelihood(object):
         self.par_dict_default = flavio.default_parameters.get_central_all()
         self.par_dict_default.update(par_dict)
         self._par_dict_sm = None
+        self._observables = None
         self.fix_ckm = fix_ckm
         if self.fix_ckm:
             self._fast_likelihoods_yaml = self._fast_likelihoods_yaml_fixckm
@@ -236,6 +238,8 @@ class GlobalLikelihood(object):
                     raise AssertionError('The measurements {} have not been found. Please upgrade {} to the latest version.'.format(meas_missing,to_upgrade))
             self.likelihoods[fn] = L
         for name, observables in self._custom_likelihoods_dict.items():
+            if set(observables) - self.observables:
+                raise ValueError('The following observables are not part of any inlcuded (fast)likelihood and thus cannot be used in a custom likelihood: {}.'.format(', '.join(str(obs) for obs in set(observables) - self.observables)))
             L = CustomLikelihood(self, observables)
             self.custom_likelihoods['custom_' + name] = L
 
@@ -311,6 +315,17 @@ class GlobalLikelihood(object):
         for name, flh in self.fast_likelihoods.items():
             filename = os.path.join(folder, name + '.p')
             flh.exp_covariance.load(filename)
+
+    @property
+    def observables(self):
+        if self._observables is None:
+            self._observables = set.union(*(
+                set(lh.observables) for lh in chain(
+                    self.fast_likelihoods.values(),
+                    self.likelihoods.values()
+                )
+            ))
+        return self._observables
 
     @property
     def log_likelihood_sm(self):
