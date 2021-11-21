@@ -775,7 +775,7 @@ class CustomLikelihood(object):
         if set(observables) - likelihood.observables:
             raise ValueError('The following observables are not part of any inlcuded (fast)likelihood and thus cannot be used in a custom likelihood: {}.'.format(', '.join(str(obs) for obs in set(observables) - likelihood.observables)))
         self.likelihood = likelihood
-        self.observables = list(set(observables))
+        self.observables = set(observables)
         self.exclude_obs = self._get_exclude_obs_dict()
 
     def _get_exclude_obs_dict(self):
@@ -785,7 +785,7 @@ class CustomLikelihood(object):
         for lhs_or_flhs in (self.likelihood.likelihoods,
                             self.likelihood.fast_likelihoods):
             for lh_name, lh in lhs_or_flhs.items():
-                exclude_observables = set(lh.observables) - set(self.observables)
+                exclude_observables = set(lh.observables) - self.observables
                 if set(lh.observables) != exclude_observables:
                     exclude_obs[lh_name] = exclude_observables
         return exclude_obs
