@@ -84,7 +84,8 @@ class GlobalLikelihood(object):
                  exp_cov_folder=None,
                  sm_cov_folder=None,
                  custom_likelihoods=None,
-                 custom_measurements=None,
+                 add_measurements=None,
+                 remove_measurements=None,
                  fix_ckm=False,
                  ckm_scheme='CKMSchemeRmuBtaunuBxlnuDeltaM'):
         """Initialize the likelihood.
@@ -122,8 +123,11 @@ class GlobalLikelihood(object):
           observables and each key is a string that serves as user-defined
           name. For each item of the dictionary, a custom likelihood will be
           computed.
-        - custom_measurements: a dictionary in which each key is a likelihood
+        - add_measurements: a dictionary in which each key is a likelihood
           and each value is a list of measurements to be added to that
+          likelihood.
+        - remove_measurements: a dictionary in which each key is a likelihood
+          and each value is a list of measurements to be removed from that
           likelihood.
         - fix_ckm: If False (default), automatically determine the CKM elements
           in the presence of new physics in processes used to determine these
@@ -154,7 +158,8 @@ class GlobalLikelihood(object):
         self.custom_likelihoods = {}
         self._load_likelihoods(include_likelihoods=include_likelihoods,
                                exclude_likelihoods=exclude_likelihoods,
-                               custom_measurements=custom_measurements)
+                               add_measurements=add_measurements,
+                               remove_measurements=remove_measurements)
         self._all_likelihoods = {
             'global': _global_llh(self),
             **self.fast_likelihoods,
@@ -183,13 +188,16 @@ class GlobalLikelihood(object):
     def _load_likelihoods(self,
                           include_likelihoods=None,
                           exclude_likelihoods=None,
-                          custom_measurements=None):
-        custom_measurements = custom_measurements or {}
+                          add_measurements=None,
+                          remove_measurements=None):
+        add_measurements = add_measurements or {}
+        remove_measurements = remove_measurements or {}
         if include_likelihoods is not None and exclude_likelihoods is not None:
             raise ValueError("include_likelihoods and exclude_likelihoods "
                              "should not be specified simultaneously.")
         for argument_name, argument in [('exclude_likelihoods', exclude_likelihoods), ('include_likelihoods',include_likelihoods),
-                                         ('custom_measurements', custom_measurements.keys())]:
+                                         ('add_measurements', add_measurements.keys()),
+                                         ('remove_measurements', remove_measurements.keys())]:
             if argument:
                 unknown_likelihoods = set(argument) - set(self._fast_likelihoods_yaml + self._likelihoods_yaml)
                 if unknown_likelihoods:
@@ -205,11 +213,16 @@ class GlobalLikelihood(object):
                 continue
             with open(self._get_yaml_path(fn), 'r') as f:
                 yaml_dict = flavio.io.yaml.load_include(f)
-                if not self.fix_ckm:
-                    yaml_dict['par_obj'] = par_ckm_dict
+                if fn in add_measurements.keys():
+                    yaml_dict['include_measurements'] += add_measurements[fn]
+                if fn in remove_measurements.keys():
+                    meas_missing = set(remove_measurements[fn])-set(yaml_dict['include_measurements'])
+                    if meas_missing:
+                        to_upgrade = 'smelli' if _flavio_up_to_date else 'flavio'
+                        raise AssertionError('The measurements {} have not been found. Please upgrade {} to the latest version.'.format(meas_missing,to_upgrade))
+                    for rm in remove_measurements[fn]:
+                        yaml_dict['include_measurements'].remove(rm)
                 try:
-                    if fn in custom_measurements.keys():
-                        yaml_dict['include_measurements'] += custom_measurements[fn]
                     L = FastLikelihood.load_dict(yaml_dict)
                     meas_yaml = set(yaml_dict['include_measurements'])
                     meas_loaded = set(L.full_measurement_likelihood.get_measurements)
@@ -233,9 +246,16 @@ class GlobalLikelihood(object):
                 continue
             with open(self._get_yaml_path(fn), 'r') as f:
                 yaml_dict = flavio.io.yaml.load_include(f)
+                if fn in add_measurements.keys():
+                    yaml_dict['include_measurements'] += add_measurements[fn]
+                if fn in remove_measurements.keys():
+                    meas_missing = set(remove_measurements[fn])-set(yaml_dict['include_measurements'])
+                    if meas_missing:
+                        to_upgrade = 'smelli' if _flavio_up_to_date else 'flavio'
+                        raise AssertionError('The measurements {} have not been found. Please upgrade {} to the latest version.'.format(meas_missing,to_upgrade))
+                    for rm in remove_measurements[fn]:
+                        yaml_dict['include_measurements'].remove(rm)
                 try:
-                    if fn in custom_measurements.keys():
-                        yaml_dict['include_measurements'] += custom_measurements[fn]
                     L = Likelihood.load_dict(yaml_dict)
                     meas_yaml = set(yaml_dict['include_measurements'])
                     meas_loaded = set(L.measurement_likelihood.get_measurements)
