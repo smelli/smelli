@@ -57,8 +57,8 @@ class TestGlobalLikelihood(unittest.TestCase):
         self.assertRaises(ValueError, GlobalLikelihood, exclude_likelihoods=["nonexistent_likelihood.yaml"])
         self.assertRaises(ValueError, GlobalLikelihood, add_measurements={"nonexistent_likelihood.yaml":""})
         self.assertRaises(ValueError, GlobalLikelihood, remove_measurements={"nonexistent_likelihood.yaml":""})
-        self.assertRaises(AssertionError, GlobalLikelihood, add_measurements={"likelihood_ewpt.yaml":"nonexistent_measurement"})
-        self.assertRaises(AssertionError, GlobalLikelihood, remove_measurements={"likelihood_ewpt.yaml":"nonexistent_measurement"})
+        self.assertRaises(ValueError, GlobalLikelihood, add_measurements={"likelihood_ewpt.yaml":"nonexistent_measurement"})
+        self.assertRaises(ValueError, GlobalLikelihood, remove_measurements={"likelihood_ewpt.yaml":"nonexistent_measurement"})
 
 
 
