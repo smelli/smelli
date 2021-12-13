@@ -55,6 +55,12 @@ class TestGlobalLikelihood(unittest.TestCase):
         self.assertNotIn('likelihood_lfv.yaml', set(ll.keys()))
         self.assertRaises(ValueError, GlobalLikelihood, include_likelihoods=["nonexistent_likelihood.yaml"])
         self.assertRaises(ValueError, GlobalLikelihood, exclude_likelihoods=["nonexistent_likelihood.yaml"])
+        self.assertRaises(ValueError, GlobalLikelihood, add_measurements={"nonexistent_likelihood.yaml":""})
+        self.assertRaises(ValueError, GlobalLikelihood, remove_measurements={"nonexistent_likelihood.yaml":""})
+        self.assertRaises(ValueError, GlobalLikelihood, add_measurements={"likelihood_ewpt.yaml":"nonexistent_measurement"})
+        self.assertRaises(ValueError, GlobalLikelihood, remove_measurements={"likelihood_ewpt.yaml":"nonexistent_measurement"})
+
+
 
     def test_chi2_min(self):
         gl_ewpt = GlobalLikelihood(fix_ckm=True, include_likelihoods=[

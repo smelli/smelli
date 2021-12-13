@@ -84,6 +84,8 @@ class GlobalLikelihood(object):
                  exp_cov_folder=None,
                  sm_cov_folder=None,
                  custom_likelihoods=None,
+                 add_measurements=None,
+                 remove_measurements=None,
                  fix_ckm=False,
                  ckm_scheme='CKMSchemeRmuBtaunuBxlnuDeltaM'):
         """Initialize the likelihood.
@@ -121,6 +123,14 @@ class GlobalLikelihood(object):
           observables and each key is a string that serves as user-defined
           name. For each item of the dictionary, a custom likelihood will be
           computed.
+        - add_measurements: a dictionary in which each key is a string that
+          corresponds to one of smelli's likelihoods and each value is a list
+          of strings corresponding to the measurements to be added to that
+          likelihood.
+        - remove_measurements: a dictionary in which each key is a string that
+          corresponds to one of smelli's likelihoods and each value is a list
+          of strings corresponding to the measurements to be removed from that
+          likelihood.
         - fix_ckm: If False (default), automatically determine the CKM elements
           in the presence of new physics in processes used to determine these
           elements in the SM. If set to True, the CKM elements are fixed to
@@ -149,7 +159,9 @@ class GlobalLikelihood(object):
         self._custom_likelihoods_dict = custom_likelihoods or {}
         self.custom_likelihoods = {}
         self._load_likelihoods(include_likelihoods=include_likelihoods,
-                               exclude_likelihoods=exclude_likelihoods)
+                               exclude_likelihoods=exclude_likelihoods,
+                               add_measurements=add_measurements,
+                               remove_measurements=remove_measurements)
         self._all_likelihoods = {
             'global': _global_llh(self),
             **self.fast_likelihoods,
@@ -177,11 +189,17 @@ class GlobalLikelihood(object):
 
     def _load_likelihoods(self,
                           include_likelihoods=None,
-                          exclude_likelihoods=None):
+                          exclude_likelihoods=None,
+                          add_measurements=None,
+                          remove_measurements=None):
+        add_measurements = add_measurements or {}
+        remove_measurements = remove_measurements or {}
         if include_likelihoods is not None and exclude_likelihoods is not None:
             raise ValueError("include_likelihoods and exclude_likelihoods "
                              "should not be specified simultaneously.")
-        for argument_name, argument in [('exclude_likelihoods', exclude_likelihoods), ('include_likelihoods',include_likelihoods)]:
+        for argument_name, argument in [('exclude_likelihoods', exclude_likelihoods), ('include_likelihoods',include_likelihoods),
+                                         ('add_measurements', add_measurements.keys()),
+                                         ('remove_measurements', remove_measurements.keys())]:
             if argument:
                 unknown_likelihoods = set(argument) - set(self._fast_likelihoods_yaml + self._likelihoods_yaml)
                 if unknown_likelihoods:
@@ -199,6 +217,17 @@ class GlobalLikelihood(object):
                 yaml_dict = flavio.io.yaml.load_include(f)
                 if not self.fix_ckm:
                     yaml_dict['par_obj'] = par_ckm_dict
+                if fn in add_measurements.keys():
+                    meas_missing = set(add_measurements[fn]) - set(flavio.Measurement.instances.keys())
+                    if meas_missing:
+                        raise ValueError(f'The measurements {meas_missing} have not been found. Please add them to flavio.')
+                    yaml_dict['include_measurements'] += add_measurements[fn]
+                if fn in remove_measurements.keys():
+                    meas_missing = set(remove_measurements[fn])-set(yaml_dict['include_measurements'])
+                    if meas_missing:
+                        raise ValueError(f'The measurements {meas_missing} are not part of {fn} and therefore cannot be removed.')
+                    for rm in remove_measurements[fn]:
+                        yaml_dict['include_measurements'].remove(rm)
                 try:
                     L = FastLikelihood.load_dict(yaml_dict)
                     meas_yaml = set(yaml_dict['include_measurements'])
@@ -223,6 +252,17 @@ class GlobalLikelihood(object):
                 continue
             with open(self._get_yaml_path(fn), 'r') as f:
                 yaml_dict = flavio.io.yaml.load_include(f)
+                if fn in add_measurements.keys():
+                    meas_missing = set(add_measurements[fn])-set(flavio.Measurement.instances.keys())
+                    if meas_missing:
+                        raise ValueError(f'The measurements {meas_missing} have not been found. Please add them to flavio.')
+                    yaml_dict['include_measurements'] += add_measurements[fn]
+                if fn in remove_measurements.keys():
+                    meas_missing = set(remove_measurements[fn])-set(yaml_dict['include_measurements'])
+                    if meas_missing:
+                        raise ValueError(f'The measurements {meas_missing} are not part of {fn} and therefore cannot be removed.')
+                    for rm in remove_measurements[fn]:
+                        yaml_dict['include_measurements'].remove(rm)
                 try:
                     L = Likelihood.load_dict(yaml_dict)
                     meas_yaml = set(yaml_dict['include_measurements'])
