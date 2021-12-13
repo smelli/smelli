@@ -218,12 +218,14 @@ class GlobalLikelihood(object):
                 if not self.fix_ckm:
                     yaml_dict['par_obj'] = par_ckm_dict
                 if fn in add_measurements.keys():
+                    meas_missing = set(add_measurements[fn]) - set(flavio.Measurement.instances.keys())
+                    if meas_missing:
+                        raise ValueError(f'The measurements {meas_missing} have not been found. Please add them to flavio.')
                     yaml_dict['include_measurements'] += add_measurements[fn]
                 if fn in remove_measurements.keys():
                     meas_missing = set(remove_measurements[fn])-set(yaml_dict['include_measurements'])
                     if meas_missing:
-                        to_upgrade = 'smelli' if _flavio_up_to_date else 'flavio'
-                        raise ValueErro(f'The measurements {meas_missing} are not part of {fn} and therefore cannot be removed.')
+                        raise ValueError(f'The measurements {meas_missing} are not part of {fn} and therefore cannot be removed.')
                     for rm in remove_measurements[fn]:
                         yaml_dict['include_measurements'].remove(rm)
                 try:
@@ -251,12 +253,14 @@ class GlobalLikelihood(object):
             with open(self._get_yaml_path(fn), 'r') as f:
                 yaml_dict = flavio.io.yaml.load_include(f)
                 if fn in add_measurements.keys():
+                    meas_missing = set(add_measurements[fn])-set(flavio.Measurement.instances.keys())
+                    if meas_missing:
+                        raise ValueError(f'The measurements {meas_missing} have not been found. Please add them to flavio.')
                     yaml_dict['include_measurements'] += add_measurements[fn]
                 if fn in remove_measurements.keys():
                     meas_missing = set(remove_measurements[fn])-set(yaml_dict['include_measurements'])
                     if meas_missing:
-                        to_upgrade = 'smelli' if _flavio_up_to_date else 'flavio'
-                        raise ValueErro(f'The measurements {meas_missing} are not part of {fn} and therefore cannot be removed.')
+                        raise ValueError(f'The measurements {meas_missing} are not part of {fn} and therefore cannot be removed.')
                     for rm in remove_measurements[fn]:
                         yaml_dict['include_measurements'].remove(rm)
                 try:
