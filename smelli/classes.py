@@ -19,6 +19,7 @@ from numbers import Number
 import inspect
 from flavio.math.optimize import minimize_robust
 from smelli import _flavio_up_to_date
+from itertools import chain
 
 
 # by default, smelli uses leading log accuracy for SMEFT running!
@@ -136,6 +137,7 @@ class GlobalLikelihood(object):
         self.par_dict_default = flavio.default_parameters.get_central_all()
         self.par_dict_default.update(par_dict)
         self._par_dict_sm = None
+        self._observables = None
         self.fix_ckm = fix_ckm
         if self.fix_ckm:
             self._fast_likelihoods_yaml = self._fast_likelihoods_yaml_fixckm
@@ -311,6 +313,17 @@ class GlobalLikelihood(object):
         for name, flh in self.fast_likelihoods.items():
             filename = os.path.join(folder, name + '.p')
             flh.exp_covariance.load(filename)
+
+    @property
+    def observables(self):
+        if self._observables is None:
+            self._observables = set.union(*(
+                set(lh.observables) for lh in chain(
+                    self.fast_likelihoods.values(),
+                    self.likelihoods.values()
+                )
+            ))
+        return self._observables
 
     @property
     def log_likelihood_sm(self):
@@ -759,8 +772,17 @@ class _global_llh(object):
 
 class CustomLikelihood(object):
     def __init__(self, likelihood, observables):
+        if set(observables) - likelihood.observables:
+            raise ValueError(
+                'The following observables are not part of any included '
+                '(fast)likelihood and thus cannot be used in a custom '
+                'likelihood: {}.'.format(', '.join(
+                    str(obs) for obs
+                    in set(observables) - likelihood.observables
+                ))
+            )
         self.likelihood = likelihood
-        self.observables = observables
+        self.observables = set(observables)
         self.exclude_obs = self._get_exclude_obs_dict()
 
     def _get_exclude_obs_dict(self):
@@ -770,7 +792,7 @@ class CustomLikelihood(object):
         for lhs_or_flhs in (self.likelihood.likelihoods,
                             self.likelihood.fast_likelihoods):
             for lh_name, lh in lhs_or_flhs.items():
-                exclude_observables = set(lh.observables) - set(self.observables)
+                exclude_observables = set(lh.observables) - self.observables
                 if set(lh.observables) != exclude_observables:
                     exclude_obs[lh_name] = exclude_observables
         return exclude_obs
