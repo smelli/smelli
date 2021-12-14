@@ -44,17 +44,24 @@ class TestGlobalLikelihood(unittest.TestCase):
         ll_np = gl.parameter_point({'C9_bsmumu': -1}, 4.8)
 
     def test_incl_excl(self):
-        gl = GlobalLikelihood(eft='WET', basis='flavio', include_likelihoods=['fast_likelihood_quarks.yaml'])
+        gl = GlobalLikelihood(
+            eft='WET', basis='flavio',
+            include_likelihoods=['fast_likelihood_quarks.yaml'])
         ll = gl.parameter_point({}, 100).log_likelihood_dict()
-        self.assertSetEqual(set(ll.keys()), {'fast_likelihood_quarks.yaml', 'global'})
-        gl = GlobalLikelihood(eft='WET', basis='flavio', include_likelihoods=['likelihood_lfv.yaml'])
+        self.assertSetEqual(set(ll.keys()),
+                            {'fast_likelihood_quarks.yaml', 'global'})
+        gl = GlobalLikelihood(eft='WET', basis='flavio',
+                              include_likelihoods=['likelihood_lfv.yaml'])
         ll = gl.parameter_point({}, 100).log_likelihood_dict()
         self.assertSetEqual(set(ll.keys()), {'likelihood_lfv.yaml', 'global'})
-        gl = GlobalLikelihood(eft='WET', basis='flavio', exclude_likelihoods=['likelihood_lfv.yaml'])
+        gl = GlobalLikelihood(eft='WET', basis='flavio',
+                              exclude_likelihoods=['likelihood_lfv.yaml'])
         ll = gl.parameter_point({}, 100).log_likelihood_dict()
         self.assertNotIn('likelihood_lfv.yaml', set(ll.keys()))
-        self.assertRaises(ValueError, GlobalLikelihood, include_likelihoods=["nonexistent_likelihood.yaml"])
-        self.assertRaises(ValueError, GlobalLikelihood, exclude_likelihoods=["nonexistent_likelihood.yaml"])
+        self.assertRaises(ValueError, GlobalLikelihood,
+                          include_likelihoods=["nonexistent_likelihood.yaml"])
+        self.assertRaises(ValueError, GlobalLikelihood,
+                          exclude_likelihoods=["nonexistent_likelihood.yaml"])
 
     def test_chi2_min(self):
         gl_ewpt = GlobalLikelihood(fix_ckm=True, include_likelihoods=[
@@ -169,6 +176,15 @@ class TestGlobalLikelihood(unittest.TestCase):
             min_data_2D_2args['likelihood_ewpt.yaml']['coords_min']
         ))
 
+    def test_custom_likelihoods(self):
+        self.assertRaises(ValueError, GlobalLikelihood,
+                          custom_likelihoods={"with_typo": ["deltaMs"]})
+        self.assertRaises(ValueError, GlobalLikelihood,
+                          include_likelihoods=["likelihood_ewpt.yaml"],
+                          custom_likelihoods={"not_included": ["DeltaM_s"]})
+        self.assertRaises(ValueError, GlobalLikelihood,
+                          exclude_likelihoods=["likelihood_ewpt.yaml"],
+                          custom_likelihoods={"excluded": ["m_W"]})
 
 class TestGlobalLikelihoodPoint(unittest.TestCase):
 

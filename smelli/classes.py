@@ -773,7 +773,14 @@ class _global_llh(object):
 class CustomLikelihood(object):
     def __init__(self, likelihood, observables):
         if set(observables) - likelihood.observables:
-            raise ValueError('The following observables are not part of any inlcuded (fast)likelihood and thus cannot be used in a custom likelihood: {}.'.format(', '.join(str(obs) for obs in set(observables) - likelihood.observables)))
+            raise ValueError(
+                'The following observables are not part of any included '
+                '(fast)likelihood and thus cannot be used in a custom '
+                'likelihood: {}.'.format(', '.join(
+                    str(obs) for obs
+                    in set(observables) - likelihood.observables
+                ))
+            )
         self.likelihood = likelihood
         self.observables = set(observables)
         self.exclude_obs = self._get_exclude_obs_dict()
