@@ -1,4 +1,7 @@
-<a href="https://travis-ci.org/smelli/smelli">![Build Status](https://travis-ci.org/smelli/smelli.svg?branch=master)</a> [![Coverage Status](https://coveralls.io/repos/github/smelli/smelli/badge.svg)](https://coveralls.io/github/smelli/smelli)
+[![unit tests](https://github.com/flav-io/flavio/actions/workflows/test.yml/badge.svg)](https://github.com/smelli/smelli/actions/workflows/test.yml)
+
+
+
 
 # smelli – a global likelihood for precision constraints
 
@@ -59,11 +62,17 @@ If you want to follow this route, please open an [issue](https://github.com/smel
 
 ## Contributors
 
-In alphabetical order:
+Maintainer:
+
+- Peter Stangl (@peterstangl)
+
+Contributors (in alphabetical order):
 
 - Jason Aebischer
+- Matěj Hudec
 - Matthew Kirk
 - Jacky Kumar
+- Niladri Sahoo
 - Peter Stangl
 - David M. Straub
 
