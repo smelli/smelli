@@ -31,6 +31,6 @@ setup(name='smelli',
         'multipledispatch'
       ],
       extras_require={
-            'testing': ['nose'],
+            'testing': ['pytest'],
       },
       )
