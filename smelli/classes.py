@@ -419,11 +419,32 @@ class GlobalLikelihood(object):
     def _log_likelihood(self, par_dict, w):
         """Return the log-likelihood as a dictionary for an instance of
         `wilson.Wilson`."""
+        coefs = {}
         ll = {}
+        smeft_matchingscale = w.get_option('smeft_matchingscale')
+
+        def wilson_renormalization_scale(lh):
+            if w.wc is None:
+                return w
+            if lh.renormalization_scale is None:
+                return w
+            if lh.renormalization_scale not in coefs.keys():
+                if lh.renormalization_scale >= smeft_matchingscale:
+                    coefs[lh.renormalization_scale] = Wilson.from_wc(w.match_run(
+                        lh.renormalization_scale, eft='SMEFT', basis=w.wc.basis))
+                else:
+                    if 'match' not in coefs.keys():
+                        coefs['match'] = Wilson.from_wc(w.match_run(
+                            smeft_matchingscale, eft='WET', basis='JMS'))
+                    coefs[lh.renormalization_scale] = Wilson.from_wc(
+                        coefs['match'].match_run(lh.renormalization_scale, eft='WET', basis='JMS'))
+            return coefs[lh.renormalization_scale]
+
         for name, flh in self.fast_likelihoods.items():
             ll[name] = flh.log_likelihood(par_dict, w, delta=True)
         for name, lh in self.likelihoods.items():
-            ll[name] = lh.log_likelihood(par_dict, w, delta=True)
+            wlh = wilson_renormalization_scale(lh)
+            ll[name] = lh.log_likelihood(par_dict, wlh, delta=True)
         for name, clh in self.custom_likelihoods.items():
             ll[name] = clh.log_likelihood(par_dict, w, delta=True)
         return ll
@@ -881,7 +902,14 @@ class GlobalLikelihoodPoint(object):
         for this parameter point in Wilson coefficient space."""
         scheme = self.likelihood._ckm_scheme
         try:
-            Vus, Vcb, Vub, delta = scheme.ckm_np(self.w_input)
+            if self.w_input.wc.eft == 'SMEFT':
+                smeft_matchingscale = self.w_input.get_option(
+                    'smeft_matchingscale')
+                w2 = Wilson.from_wc(self.w_input.match_run(
+                    smeft_matchingscale, eft='WET', basis='JMS'))
+            else:
+                w2 = self.w_input
+            Vus, Vcb, Vub, delta = scheme.ckm_np(w2)
         except ValueError:
             # this happens mostly when the formulas result in |cos(delta)| > 1
             raise ValueError("The extraction of CKM elements failed. Too large NP effects?")

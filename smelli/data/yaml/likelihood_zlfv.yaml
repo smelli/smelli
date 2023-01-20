@@ -3,3 +3,4 @@ observables: !include_merge_list
   - observables_zlfv.yaml
 include_measurements: !include_merge_list
   - measurements_zlfv.yaml
+renormalization_scale: 91.1876
