@@ -126,7 +126,7 @@
   name: dsigma(ee->ll)
   fam: 3
   afb: True
-- E: 186.6
+- E: 188.6
   name: dsigma(ee->ee)
   cthmin: -0.90
   cthmax: -0.72
