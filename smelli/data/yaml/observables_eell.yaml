@@ -1,131 +1,131 @@
 - E: 182.7
   name: dsigma(ee->ll)
   fam: 2
-  afb: False
 - E: 188.6
   name: dsigma(ee->ll)
   fam: 2
-  afb: False
 - E: 191.6
   name: dsigma(ee->ll)
   fam: 2
-  afb: False
 - E: 195.5
   name: dsigma(ee->ll)
   fam: 2
-  afb: False
 - E: 199.5
   name: dsigma(ee->ll)
   fam: 2
-  afb: False
 - E: 201.6
   name: dsigma(ee->ll)
   fam: 2
-  afb: False
 - E: 204.9
   name: dsigma(ee->ll)
   fam: 2
-  afb: False
 - E: 206.6
   name: dsigma(ee->ll)
   fam: 2
-  afb: False
 - E: 182.7
   name: dsigma(ee->ll)
   fam: 3
-  afb: False
 - E: 188.6
   name: dsigma(ee->ll)
   fam: 3
-  afb: False
 - E: 191.6
   name: dsigma(ee->ll)
   fam: 3
-  afb: False
 - E: 195.5
   name: dsigma(ee->ll)
   fam: 3
-  afb: False
 - E: 199.5
   name: dsigma(ee->ll)
   fam: 3
-  afb: False
 - E: 201.6
   name: dsigma(ee->ll)
   fam: 3
-  afb: False
 - E: 204.9
   name: dsigma(ee->ll)
   fam: 3
-  afb: False
 - E: 206.6
   name: dsigma(ee->ll)
   fam: 3
-  afb: False
 - E: 182.7
-  name: dsigma(ee->ll)
+  name: AFB(ee->ll)
   fam: 2
-  afb: True
+  AfbSM: 0.576
+  sigmaSM: 3.444
 - E: 188.6
-  name: dsigma(ee->ll)
+  name: AFB(ee->ll)
   fam: 2
-  afb: True
+  AfbSM: 0.569
+  sigmaSM: 3.207
 - E: 191.6
-  name: dsigma(ee->ll)
+  name: AFB(ee->ll)
   fam: 2
-  afb: True
+  AfbSM: 0.569
+  sigmaSM: 3.096
 - E: 195.5
-  name: dsigma(ee->ll)
+  name: AFB(ee->ll)
   fam: 2
-  afb: True
+  AfbSM: 0.562
+  sigmaSM: 2.961
 - E: 199.5
-  name: dsigma(ee->ll)
+  name: AFB(ee->ll)
   fam: 2
-  afb: True
+  AfbSM: 0.558
+  sigmaSM: 2.833
 - E: 201.6
-  name: dsigma(ee->ll)
+  name: AFB(ee->ll)
   fam: 2
-  afb: True
+  AfbSM: 0.556
+  sigmaSM: 2.766
 - E: 204.9
-  name: dsigma(ee->ll)
+  name: AFB(ee->ll)
   fam: 2
-  afb: True
+  AfbSM: 0.553
+  sigmaSM: 2.673
 - E: 206.6
-  name: dsigma(ee->ll)
+  name: AFB(ee->ll)
   fam: 2
-  afb: True
+  AfbSM: 0.552
+  sigmaSM: 2.628
 - E: 182.7
-  name: dsigma(ee->ll)
+  name: AFB(ee->ll)
   fam: 3
-  afb: True
+  AfbSM: 0.576
+  sigmaSM: 3.444
 - E: 188.6
-  name: dsigma(ee->ll)
+  name: AFB(ee->ll)
   fam: 3
-  afb: True
+  AfbSM: 0.569
+  sigmaSM: 3.206
 - E: 191.6
-  name: dsigma(ee->ll)
+  name: AFB(ee->ll)
   fam: 3
-  afb: True
+  AfbSM: 0.565
+  sigmaSM: 3.096
 - E: 195.5
-  name: dsigma(ee->ll)
+  name: AFB(ee->ll)
   fam: 3
-  afb: True
+  AfbSM: 0.561
+  sigmaSM: 2.961
 - E: 199.5
-  name: dsigma(ee->ll)
+  name: AFB(ee->ll)
   fam: 3
-  afb: True
+  AfbSM: 0.558
+  sigmaSM: 2.832
 - E: 201.6
-  name: dsigma(ee->ll)
+  name: AFB(ee->ll)
   fam: 3
-  afb: True
+  AfbSM: 0.556
+  sigmaSM: 2.765
 - E: 204.9
-  name: dsigma(ee->ll)
+  name: AFB(ee->ll)
   fam: 3
-  afb: True
+  AfbSM: 0.553
+  sigmaSM: 2.672
 - E: 206.6
-  name: dsigma(ee->ll)
+  name: AFB(ee->ll)
   fam: 3
-  afb: True
+  AfbSM: 0.552
+  sigmaSM: 2.628
 - E: 188.6
   name: dsigma(ee->ee)
   cthmin: -0.90
