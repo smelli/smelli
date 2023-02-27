@@ -59,7 +59,7 @@
 - E: 191.6
   name: AFB(ee->ll)
   fam: 2
-  AfbSM: 0.569
+  AfbSM: 0.566
   sigmaSM: 3.096
 - E: 195.5
   name: AFB(ee->ll)
