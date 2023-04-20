@@ -26,5 +26,7 @@ observables: !include_merge_list
   - observables_n.yaml
   - observables_beta.yaml
   - observables_udlnu.yaml
+  # b->dll
+  - observables_bdll.yaml
 include_measurements: !include_merge_list
   - measurements_quarks.yaml
