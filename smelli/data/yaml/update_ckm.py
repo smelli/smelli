@@ -29,7 +29,7 @@ def save_ckm(scheme,file_path,N=10000):
     ]
 
     with open(file_path, 'w') as f:
-        yaml.dump(dat, f)
+        yaml.dump(dat, f, default_flow_style=None)
 
 for name, ckm_scheme in get_ckm_schemes().items():
     file_path = '{}_{}.yaml'.format(FILE,name)
