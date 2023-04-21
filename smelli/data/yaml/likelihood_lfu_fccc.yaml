@@ -6,5 +6,7 @@ observables: !include_merge_list
   - observables_udlnu_lfu.yaml
   # K LFU
   - observables_klfu.yaml
+  # b->uenu
+  - observables_buenu_lfu.yaml
 include_measurements: !include_merge_list
   - measurements_lfu_fccc.yaml
