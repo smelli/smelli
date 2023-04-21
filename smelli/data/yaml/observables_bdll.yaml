@@ -1,0 +1,11 @@
+- name: <dBR/dq2>(B+->pimumu)
+  q2min: 2
+  q2max: 4
+- name: <dBR/dq2>(B+->pimumu)
+  q2min: 4
+  q2max: 6
+- name: <dBR/dq2>(B+->pimumu)
+  q2min: 15
+  q2max: 22
+- BR_LHCb(Bs->K*0mumu)
+- BR_Belle(B+->piee)
