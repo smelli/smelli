@@ -1,4 +1,3 @@
 - BR(B0->pitaunu)
 # - BR(B+->taunu)
-- BR(B+->enu)
-- BR(B+->munu)
+- BR(B+->munu)  # the electron channel is included in observables_buenu_lfu.yaml
