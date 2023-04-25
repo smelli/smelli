@@ -22,6 +22,8 @@ observables: !include_merge_list
   # K
   - observables_k.yaml
   - observables_sulnu.yaml
+  # D
+  - observables_d.yaml
   # u->dlnu
   - observables_n.yaml
   - observables_beta.yaml
