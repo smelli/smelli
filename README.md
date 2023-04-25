@@ -73,6 +73,7 @@ Contributors (in alphabetical order):
 - Matthew Kirk
 - Jacky Kumar
 - Niladri Sahoo
+- Aleks Smolkovič
 - Peter Stangl
 - David M. Straub
 
