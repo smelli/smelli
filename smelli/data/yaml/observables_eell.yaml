@@ -1,549 +1,549 @@
 - E: 182.7
-  name: dsigma(ee->ll)
+  name: R_sigma(ee->ll)
   fam: 2
 - E: 188.6
-  name: dsigma(ee->ll)
+  name: R_sigma(ee->ll)
   fam: 2
 - E: 191.6
-  name: dsigma(ee->ll)
+  name: R_sigma(ee->ll)
   fam: 2
 - E: 195.5
-  name: dsigma(ee->ll)
+  name: R_sigma(ee->ll)
   fam: 2
 - E: 199.5
-  name: dsigma(ee->ll)
+  name: R_sigma(ee->ll)
   fam: 2
 - E: 201.6
-  name: dsigma(ee->ll)
+  name: R_sigma(ee->ll)
   fam: 2
 - E: 204.9
-  name: dsigma(ee->ll)
+  name: R_sigma(ee->ll)
   fam: 2
 - E: 206.6
-  name: dsigma(ee->ll)
+  name: R_sigma(ee->ll)
   fam: 2
 - E: 182.7
-  name: dsigma(ee->ll)
+  name: R_sigma(ee->ll)
   fam: 3
 - E: 188.6
-  name: dsigma(ee->ll)
+  name: R_sigma(ee->ll)
   fam: 3
 - E: 191.6
-  name: dsigma(ee->ll)
+  name: R_sigma(ee->ll)
   fam: 3
 - E: 195.5
-  name: dsigma(ee->ll)
+  name: R_sigma(ee->ll)
   fam: 3
 - E: 199.5
-  name: dsigma(ee->ll)
+  name: R_sigma(ee->ll)
   fam: 3
 - E: 201.6
-  name: dsigma(ee->ll)
+  name: R_sigma(ee->ll)
   fam: 3
 - E: 204.9
-  name: dsigma(ee->ll)
+  name: R_sigma(ee->ll)
   fam: 3
 - E: 206.6
-  name: dsigma(ee->ll)
+  name: R_sigma(ee->ll)
   fam: 3
 - E: 182.7
-  name: AFB(ee->ll)
+  name: R_Afb(ee->ll)
   fam: 2
   AfbSM: 0.576
   sigmaSM: 3.444
 - E: 188.6
-  name: AFB(ee->ll)
+  name: R_Afb(ee->ll)
   fam: 2
   AfbSM: 0.569
   sigmaSM: 3.207
 - E: 191.6
-  name: AFB(ee->ll)
+  name: R_Afb(ee->ll)
   fam: 2
   AfbSM: 0.566
   sigmaSM: 3.096
 - E: 195.5
-  name: AFB(ee->ll)
+  name: R_Afb(ee->ll)
   fam: 2
   AfbSM: 0.562
   sigmaSM: 2.961
 - E: 199.5
-  name: AFB(ee->ll)
+  name: R_Afb(ee->ll)
   fam: 2
   AfbSM: 0.558
   sigmaSM: 2.833
 - E: 201.6
-  name: AFB(ee->ll)
+  name: R_Afb(ee->ll)
   fam: 2
   AfbSM: 0.556
   sigmaSM: 2.766
 - E: 204.9
-  name: AFB(ee->ll)
+  name: R_Afb(ee->ll)
   fam: 2
   AfbSM: 0.553
   sigmaSM: 2.673
 - E: 206.6
-  name: AFB(ee->ll)
+  name: R_Afb(ee->ll)
   fam: 2
   AfbSM: 0.552
   sigmaSM: 2.628
 - E: 182.7
-  name: AFB(ee->ll)
+  name: R_Afb(ee->ll)
   fam: 3
   AfbSM: 0.576
   sigmaSM: 3.444
 - E: 188.6
-  name: AFB(ee->ll)
+  name: R_Afb(ee->ll)
   fam: 3
   AfbSM: 0.569
   sigmaSM: 3.206
 - E: 191.6
-  name: AFB(ee->ll)
+  name: R_Afb(ee->ll)
   fam: 3
   AfbSM: 0.565
   sigmaSM: 3.096
 - E: 195.5
-  name: AFB(ee->ll)
+  name: R_Afb(ee->ll)
   fam: 3
   AfbSM: 0.561
   sigmaSM: 2.961
 - E: 199.5
-  name: AFB(ee->ll)
+  name: R_Afb(ee->ll)
   fam: 3
   AfbSM: 0.558
   sigmaSM: 2.832
 - E: 201.6
-  name: AFB(ee->ll)
+  name: R_Afb(ee->ll)
   fam: 3
   AfbSM: 0.556
   sigmaSM: 2.765
 - E: 204.9
-  name: AFB(ee->ll)
+  name: R_Afb(ee->ll)
   fam: 3
   AfbSM: 0.553
   sigmaSM: 2.672
 - E: 206.6
-  name: AFB(ee->ll)
+  name: R_Afb(ee->ll)
   fam: 3
   AfbSM: 0.552
   sigmaSM: 2.628
 - E: 188.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: -0.90
   cthmax: -0.72
 - E: 188.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: -0.72
   cthmax: -0.54
 - E: 188.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: -0.54
   cthmax: -0.36
 - E: 188.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: -0.36
   cthmax: -0.18
 - E: 188.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: -0.18
   cthmax:  0.00
 - E: 188.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.00
   cthmax: 0.09
 - E: 188.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.09
   cthmax: 0.18
 - E: 188.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.18
   cthmax: 0.27
 - E: 188.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.27
   cthmax: 0.36
 - E: 188.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.36
   cthmax: 0.45
 - E: 188.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.45
   cthmax: 0.54
 - E: 188.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.54
   cthmax: 0.63
 - E: 188.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.63
   cthmax: 0.72
 - E: 188.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.72
   cthmax: 0.81
 - E: 188.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.81
   cthmax: 0.90
 - E: 191.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: -0.90
   cthmax: -0.72
 - E: 191.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: -0.72
   cthmax: -0.54
 - E: 191.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: -0.54
   cthmax: -0.36
 - E: 191.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: -0.36
   cthmax: -0.18
 - E: 191.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: -0.18
   cthmax:  0.00
 - E: 191.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.00
   cthmax: 0.09
 - E: 191.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.09
   cthmax: 0.18
 - E: 191.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.18
   cthmax: 0.27
 - E: 191.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.27
   cthmax: 0.36
 - E: 191.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.36
   cthmax: 0.45
 - E: 191.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.45
   cthmax: 0.54
 - E: 191.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.54
   cthmax: 0.63
 - E: 191.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.63
   cthmax: 0.72
 - E: 191.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.72
   cthmax: 0.81
 - E: 191.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.81
   cthmax: 0.90
 - E: 195.5
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: -0.90
   cthmax: -0.72
 - E: 195.5
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: -0.72
   cthmax: -0.54
 - E: 195.5
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: -0.54
   cthmax: -0.36
 - E: 195.5
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: -0.36
   cthmax: -0.18
 - E: 195.5
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: -0.18
   cthmax:  0.00
 - E: 195.5
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.00
   cthmax: 0.09
 - E: 195.5
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.09
   cthmax: 0.18
 - E: 195.5
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.18
   cthmax: 0.27
 - E: 195.5
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.27
   cthmax: 0.36
 - E: 195.5
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.36
   cthmax: 0.45
 - E: 195.5
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.45
   cthmax: 0.54
 - E: 195.5
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.54
   cthmax: 0.63
 - E: 195.5
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.63
   cthmax: 0.72
 - E: 195.5
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.72
   cthmax: 0.81
 - E: 195.5
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.81
   cthmax: 0.90
 - E: 199.5
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: -0.90
   cthmax: -0.72
 - E: 199.5
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: -0.72
   cthmax: -0.54
 - E: 199.5
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: -0.54
   cthmax: -0.36
 - E: 199.5
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: -0.36
   cthmax: -0.18
 - E: 199.5
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: -0.18
   cthmax:  0.00
 - E: 199.5
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.00
   cthmax: 0.09
 - E: 199.5
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.09
   cthmax: 0.18
 - E: 199.5
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.18
   cthmax: 0.27
 - E: 199.5
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.27
   cthmax: 0.36
 - E: 199.5
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.36
   cthmax: 0.45
 - E: 199.5
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.45
   cthmax: 0.54
 - E: 199.5
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.54
   cthmax: 0.63
 - E: 199.5
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.63
   cthmax: 0.72
 - E: 199.5
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.72
   cthmax: 0.81
 - E: 199.5
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.81
   cthmax: 0.90
 - E: 201.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: -0.90
   cthmax: -0.72
 - E: 201.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: -0.72
   cthmax: -0.54
 - E: 201.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: -0.54
   cthmax: -0.36
 - E: 201.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: -0.36
   cthmax: -0.18
 - E: 201.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: -0.18
   cthmax:  0.00
 - E: 201.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.00
   cthmax: 0.09
 - E: 201.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.09
   cthmax: 0.18
 - E: 201.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.18
   cthmax: 0.27
 - E: 201.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.27
   cthmax: 0.36
 - E: 201.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.36
   cthmax: 0.45
 - E: 201.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.45
   cthmax: 0.54
 - E: 201.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.54
   cthmax: 0.63
 - E: 201.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.63
   cthmax: 0.72
 - E: 201.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.72
   cthmax: 0.81
 - E: 201.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.81
   cthmax: 0.90
 - E: 204.9
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: -0.90
   cthmax: -0.72
 - E: 204.9
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: -0.72
   cthmax: -0.54
 - E: 204.9
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: -0.54
   cthmax: -0.36
 - E: 204.9
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: -0.36
   cthmax: -0.18
 - E: 204.9
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: -0.18
   cthmax:  0.00
 - E: 204.9
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.00
   cthmax: 0.09
 - E: 204.9
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.09
   cthmax: 0.18
 - E: 204.9
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.18
   cthmax: 0.27
 - E: 204.9
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.27
   cthmax: 0.36
 - E: 204.9
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.36
   cthmax: 0.45
 - E: 204.9
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.45
   cthmax: 0.54
 - E: 204.9
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.54
   cthmax: 0.63
 - E: 204.9
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.63
   cthmax: 0.72
 - E: 204.9
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.72
   cthmax: 0.81
 - E: 204.9
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.81
   cthmax: 0.90
 - E: 206.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: -0.90
   cthmax: -0.72
 - E: 206.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: -0.72
   cthmax: -0.54
 - E: 206.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: -0.54
   cthmax: -0.36
 - E: 206.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: -0.36
   cthmax: -0.18
 - E: 206.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: -0.18
   cthmax:  0.00
 - E: 206.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.00
   cthmax: 0.09
 - E: 206.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.09
   cthmax: 0.18
 - E: 206.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.18
   cthmax: 0.27
 - E: 206.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.27
   cthmax: 0.36
 - E: 206.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.36
   cthmax: 0.45
 - E: 206.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.45
   cthmax: 0.54
 - E: 206.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.54
   cthmax: 0.63
 - E: 206.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.63
   cthmax: 0.72
 - E: 206.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.72
   cthmax: 0.81
 - E: 206.6
-  name: dsigma(ee->ee)
+  name: R_sigma(ee->ee)
   cthmin: 0.81
   cthmax: 0.90
 
