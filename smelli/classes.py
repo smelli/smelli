@@ -67,7 +67,6 @@ class GlobalLikelihood(object):
         'likelihood_ewpt.yaml',
         'likelihood_eeww.yaml',
         'likelihood_eell.yaml',
-        'likelihood_eeee.yaml',        
         'likelihood_lept.yaml',
         'likelihood_rd_rds.yaml',
         'likelihood_lfu_fccc.yaml',
@@ -223,7 +222,6 @@ class GlobalLikelihood(object):
             if self.eft != 'SMEFT' and fn in ['likelihood_ewpt.yaml',
                                               'likelihood_eeww.yaml',
                                               'likelihood_eell.yaml',
-                                              'likelihood_eeee.yaml',
                                               'likelihood_zlfv.yaml',
                                               'likelihood_higgs.yaml',]:
                 continue

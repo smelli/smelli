@@ -1,4 +1,0 @@
-observables: !include_merge_list
-  - observables_eeee.yaml
-include_measurements: !include_merge_list
-  - measurements_eeee.yaml
