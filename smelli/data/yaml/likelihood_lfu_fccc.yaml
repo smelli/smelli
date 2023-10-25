@@ -10,3 +10,4 @@ observables: !include_merge_list
   - observables_buenu_lfu.yaml
 include_measurements: !include_merge_list
   - measurements_lfu_fccc.yaml
+renormalization_scale: 4.8
