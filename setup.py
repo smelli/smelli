@@ -24,6 +24,7 @@ setup(name='smelli',
                    ]
       },
       install_requires=[
+        'setuptools<=69.5.1',
         'numpy>=1.16.5',
         'flavio>=' + __flavio__version__,
         'wilson',

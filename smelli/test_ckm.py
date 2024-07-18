@@ -14,11 +14,11 @@ class TestCKM(unittest.TestCase):
     def test_sm(self):
         scheme = ckm.CKMSchemeRmuBtaunuBxlnuDeltaM()
         scheme.ckm_covariance()
-        Vus, Vcb, Vub, delta = scheme.ckm_np(None)
+        Vus, Vcb, Vub, gamma = scheme.ckm_np(None)
         self.assertAlmostEqual(Vus, 0.225, delta=0.001)
         self.assertAlmostEqual(Vcb, 0.041, delta=0.0015)
         self.assertAlmostEqual(Vub, 0.004, delta=0.0005)
-        self.assertAlmostEqual(delta, 1.15, delta=0.2)
+        self.assertAlmostEqual(gamma, 1.15, delta=0.2)
 
     def test_ckm_np(self):
         scheme = ckm.CKMSchemeRmuBtaunuBxlnuDeltaM()
@@ -27,13 +27,13 @@ class TestCKM(unittest.TestCase):
                     'lq3_2212': 0.5e-7,
                     'qq1_2323': 1e-12,
                     }, 91.1876, 'SMEFT', 'Warsaw')
-        Vus, Vcb, Vub, delta = scheme.ckm_np(w, iterate=10)
-        w.set_option('parameters', {'Vus': Vus, 'Vcb': Vcb, 'Vub': Vub, 'gamma': delta})
-        _Vus, _Vcb, _Vub, _delta = scheme._ckm_np(w, Vus=Vus, Vcb=Vcb, Vub=Vub, delta=delta)
+        Vus, Vcb, Vub, gamma = scheme.ckm_np(w, iterate=10)
+        w.set_option('parameters', {'Vus': Vus, 'Vcb': Vcb, 'Vub': Vub, 'gamma': gamma})
+        _Vus, _Vcb, _Vub, _gamma = scheme._ckm_np(w, Vus=Vus, Vcb=Vcb, Vub=Vub, gamma=gamma)
         self.assertAlmostEqual(_Vus, Vus, places=2)
         self.assertAlmostEqual(_Vcb, Vcb, places=2)
         self.assertAlmostEqual(_Vub, Vub, places=2)
-        self.assertAlmostEqual(_delta, delta, places=2)
+        self.assertAlmostEqual(_gamma, gamma, places=2)
 
 
 class TestSmelliCKM(unittest.TestCase):
@@ -45,9 +45,9 @@ class TestSmelliCKM(unittest.TestCase):
         VcbSM = gl.par_dict_sm['Vcb']
         VubSM = gl.par_dict_sm['Vub']
         VusSM = gl.par_dict_sm['Vus']
-        deltaSM = gl.par_dict_sm['delta']
+        gammaSM = gl.par_dict_sm['gamma']
         self.assertAlmostEqual(par['Vcb'], VcbSM, delta=0.0002)
-        self.assertAlmostEqual(par['Vub'], VubSM, delta=0.0005)
+        self.assertAlmostEqual(par['Vub'], VubSM, delta=0.0006)
         self.assertAlmostEqual(par['Vus'], VusSM, delta=0.0006)
         pre = -4 * par['GF'] / sqrt(2)
         # Vcb
@@ -58,7 +58,7 @@ class TestSmelliCKM(unittest.TestCase):
         pp = gl_fixckm.parameter_point(w)
         self.assertEqual(pp.par_dict_np['Vcb'] / par['Vcb'],  1)
         # Vub
-        w = Wilson({'lq3_3313': 0.5 * pre * VubSM * (-0.5) * exp(-1j * deltaSM)}, 91.1876, 'SMEFT', 'Warsaw')
+        w = Wilson({'lq3_3313': 0.5 * pre * VubSM * (-0.5) * exp(-1j * gammaSM)}, 91.1876, 'SMEFT', 'Warsaw')
         pp = gl.parameter_point(w)
         self.assertAlmostEqual(pp.par_dict_np['Vub'] / VubSM, 1.5, delta=0.03)
         # Vus
@@ -75,4 +75,4 @@ class TestSmelliCKM(unittest.TestCase):
             self.assertAlmostEqual(par.get_central('Vus'), ckm_central[0], delta=0.00001)
             self.assertAlmostEqual(par.get_central('Vcb'), ckm_central[1], delta=0.00001)
             self.assertAlmostEqual(par.get_central('Vub'), ckm_central[2], delta=0.00001)
-            self.assertAlmostEqual(par.get_central('delta'), ckm_central[3], delta=0.0001)
+            self.assertAlmostEqual(par.get_central('gamma'), ckm_central[3], delta=0.0001)

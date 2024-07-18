@@ -338,13 +338,13 @@ class GlobalLikelihood(object):
                              " by calling `make_measurement`.")
 
     def get_ckm_sm(self):
-        Vus, Vcb, Vub, delta = self._ckm_scheme.ckm_np(w=None)
-        return {'Vus': Vus, 'Vcb': Vcb, 'Vub': Vub, 'delta': delta}
+        Vus, Vcb, Vub, gamma = self._ckm_scheme.ckm_np(w=None)
+        return {'Vus': Vus, 'Vcb': Vcb, 'Vub': Vub, 'gamma': gamma}
 
     @property
     def par_dict_sm(self):
         """Return the dictionary of parameters where the four CKM parameters
-        `Vus`, `Vcb`, `Vub`, `delta` have been replaced by their
+        `Vus`, `Vcb`, `Vub`, `gamma` have been replaced by their
         "true" values extracted assuming the SM.
         They should be almost (but not exactly) equal to the default
         flavio CKM parameters.
@@ -869,7 +869,7 @@ class GlobalLikelihoodPoint(object):
             w = self.w_input
             opt = w.get_option('parameters')
             par = self.par_dict_np
-            for p in ['Vus', 'Vcb', 'Vub', 'delta']:
+            for p in ['Vus', 'Vcb', 'Vub', 'gamma']:
                 opt[p] = par[p]
             w.set_option('parameters', opt)
             self._w = w
@@ -877,20 +877,20 @@ class GlobalLikelihoodPoint(object):
 
     def get_ckm_np(self):
         """return the values of the four "true" CKM parameters
-        `Vus`, `Vcb`, `Vub`, `delta`, extracted from the four input observables
+        `Vus`, `Vcb`, `Vub`, `gamma`, extracted from the four input observables
         for this parameter point in Wilson coefficient space."""
         scheme = self.likelihood._ckm_scheme
         try:
-            Vus, Vcb, Vub, delta = scheme.ckm_np(self.w_input)
+            Vus, Vcb, Vub, gamma = scheme.ckm_np(self.w_input)
         except ValueError:
-            # this happens mostly when the formulas result in |cos(delta)| > 1
+            # this happens mostly when the formulas result in |cos(gamma)| > 1
             raise ValueError("The extraction of CKM elements failed. Too large NP effects?")
-        return {'Vus': Vus, 'Vcb': Vcb, 'Vub': Vub, 'delta': delta}
+        return {'Vus': Vus, 'Vcb': Vcb, 'Vub': Vub, 'gamma': gamma}
 
     @property
     def par_dict_np(self):
         """Return the dictionary of parameters where the four CKM parameters
-        `Vus`, `Vcb`, `Vub`, `delta` have been replaced by their
+        `Vus`, `Vcb`, `Vub`, `gamma` have been replaced by their
         "true" values as extracted from the four input observables.
 
         Note that if `fix_ckm` is set to `True`, this method actually
