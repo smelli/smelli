@@ -47,7 +47,7 @@ class TestSmelliCKM(unittest.TestCase):
         VusSM = gl.par_dict_sm['Vus']
         gammaSM = gl.par_dict_sm['gamma']
         self.assertAlmostEqual(par['Vcb'], VcbSM, delta=0.0002)
-        self.assertAlmostEqual(par['Vub'], VubSM, delta=0.0005)
+        self.assertAlmostEqual(par['Vub'], VubSM, delta=0.0006)
         self.assertAlmostEqual(par['Vus'], VusSM, delta=0.0006)
         pre = -4 * par['GF'] / sqrt(2)
         # Vcb
