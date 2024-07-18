@@ -44,7 +44,7 @@ jobs:
           pushd _src
           python3 ./setup.py sdist -d ../dist/
           popd
-                    
+
       - name: Upload build as artifact
         uses: actions/upload-artifact@v1
         with:
@@ -54,5 +54,4 @@ jobs:
       - name: Upload to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          user:     ${{ secrets.TWINE_USERNAME }}
-          password: ${{ secrets.TWINE_PASSWORD }}
+          password: ${{ secrets.PYPI_API_TOKEN }}
