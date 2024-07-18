@@ -26,13 +26,13 @@ class CKMScheme(ABC):
     This is an abstract class that contains the following abstract methods to be
     overwritten by its subclasses:
     - ckm_fac: static method with arguments `Vus`, `Vcb`, `Vub`, and
-      `delta` that returns a list containing the CKM prefactors of the
+      `gamma` that returns a list containing the CKM prefactors of the
       four observables in the order given by the `observales` attribute.
     - get_ckm: static method that is the inverse of the `ckm_fac` method
-      such that `get_ckm(ckm_fac(Vus, Vcb, Vub, delta))` will return the
-      list `[Vus, Vcb, Vub, delta]`.
+      such that `get_ckm(ckm_fac(Vus, Vcb, Vub, gamma))` will return the
+      list `[Vus, Vcb, Vub, gamma]`.
     - jacobian: static method with arguments `Vus`, `Vcb`, `Vub`, and
-      `delta` that returns the Jacobian of the transformation defined by
+      `gamma` that returns the Jacobian of the transformation defined by
       the `ckm_fac` method in terms of a numpy array of shape (4,4).
     Furthermore, subclasses have to overwrite the following class attribute:
     - observables: class attribute containing a list of exactly four
@@ -55,12 +55,12 @@ class CKMScheme(ABC):
         # central parameter values
         self.par_central = self.par_obj.get_central_all()
         # central CKM values
-        self.ckm_par = ['Vus', 'Vub', 'Vcb', 'delta']
+        self.ckm_par = ['Vus', 'Vub', 'Vcb', 'gamma']
         self.ckm_initial = {k: self.par_central[k] for k in self.ckm_par}
 
     @staticmethod
     @abstractmethod
-    def ckm_fac(Vus, Vcb, Vub, delta):
+    def ckm_fac(Vus, Vcb, Vub, gamma):
         pass
 
     @staticmethod
@@ -71,7 +71,7 @@ class CKMScheme(ABC):
 
     @staticmethod
     @abstractmethod
-    def jacobian(Vus, Vcb, Vub, delta):
+    def jacobian(Vus, Vcb, Vub, gamma):
         pass
 
     def sm_covariance(self, N=1000):
@@ -114,7 +114,7 @@ class CKMScheme(ABC):
 
     def ckm_covariance(self, N=1000):
         """Return the covariance for the four CKM parameters
-        `Vus`, `Vcb`, `Vub`, `delta`"""
+        `Vus`, `Vcb`, `Vub`, `gamma`"""
         ckm = self.ckm_initial
         J = self.jacobian(**ckm)
         cov = self.obs_covariance(N=N)
@@ -134,7 +134,7 @@ class CKMScheme(ABC):
 
     def _ckm_np(self, w=None, **ckm):
         """Return the central values for the four CKM parameters
-        `Vus`, `Vcb`, `Vub`, `delta`,
+        `Vus`, `Vcb`, `Vub`, `gamma`,
         in the presence of new physics (parametrized by a `wilson.Wilson`
         instance `w`).
 
@@ -146,17 +146,17 @@ class CKMScheme(ABC):
 
     def ckm_np(self, w=None, iterate=10):
         """Return the central values for the four CKM parameters
-        `Vus`, `Vcb`, `Vub`, `delta`,
+        `Vus`, `Vcb`, `Vub`, `gamma`,
         in the presence of new physics (parametrized by a `wilson.Wilson`
         instance `w`) """
-        Vus, Vcb, Vub, delta = [self.ckm_initial[p] for p in ['Vus', 'Vcb', 'Vub', 'delta']]
+        Vus, Vcb, Vub, gamma = [self.ckm_initial[p] for p in ['Vus', 'Vcb', 'Vub', 'gamma']]
         for _ in range(iterate):
             if w is None:
-                Vus, Vcb, Vub, delta = self._ckm_np(w=None, Vus=Vus, Vcb=Vcb, Vub=Vub, delta=delta)
+                Vus, Vcb, Vub, gamma = self._ckm_np(w=None, Vus=Vus, Vcb=Vcb, Vub=Vub, gamma=gamma)
             else:
-                w.set_option('parameters', {'Vus': Vus, 'Vcb': Vcb, 'Vub': Vub, 'gamma': delta})
-                Vus, Vcb, Vub, delta = self._ckm_np(w, Vus=Vus, Vcb=Vcb, Vub=Vub, delta=delta)
-        return Vus, Vcb, Vub, delta
+                w.set_option('parameters', {'Vus': Vus, 'Vcb': Vcb, 'Vub': Vub, 'gamma': gamma})
+                Vus, Vcb, Vub, gamma = self._ckm_np(w, Vus=Vus, Vcb=Vcb, Vub=Vub, gamma=gamma)
+        return Vus, Vcb, Vub, gamma
 
 
 class CKMSchemeRmuBtaunuBxlnuDeltaM(CKMScheme):
@@ -164,7 +164,7 @@ class CKMSchemeRmuBtaunuBxlnuDeltaM(CKMScheme):
     - 'RKpi(P+->munu)' (mostly fixing `Vus`)
     - 'BR(B->Xcenu)' (fixing `Vcb`)
     - 'BR(B+->taunu)' (fixing `Vub`)
-    - 'DeltaM_d/DeltaM_s' (mostly fixing `delta`)
+    - 'DeltaM_d/DeltaM_s' (mostly fixing `gamma`)
     """
 
     observables=[
@@ -175,16 +175,16 @@ class CKMSchemeRmuBtaunuBxlnuDeltaM(CKMScheme):
     ]
 
     @staticmethod
-    def ckm_fac(Vus, Vcb, Vub, delta):
+    def ckm_fac(Vus, Vcb, Vub, gamma):
         """Return the for CKM prefactors as function of the four CKM elements"""
         return [
             (Vus**2 / (1 - Vub**2 - Vus**2)),
             Vcb**2,
             Vub**2,
             -((Vcb**2*Vus**2 + Vub**2*(-1 + Vcb**2 + Vub**2)*(-1 + Vub**2 + Vus**2) -
-            2*Vcb*Vub*Vus*((-1 + Vcb**2 + Vub**2)**2*(-1 + Vub**2 + Vus**2)**2)**0.25*cos(delta))/
+            2*Vcb*Vub*Vus*((-1 + Vcb**2 + Vub**2)**2*(-1 + Vub**2 + Vus**2)**2)**0.25*cos(gamma))/
             (Vcb**2*(-1 + Vub**2) + (Vcb**2 + (-1 + Vcb**2)*Vub**2 + Vub**4)*Vus**2 -
-            2*Vcb*Vub*Vus*sqrt((-1 + Vcb**2 + Vub**2)*(-1 + Vub**2 + Vus**2))*cos(delta)))
+            2*Vcb*Vub*Vus*sqrt((-1 + Vcb**2 + Vub**2)*(-1 + Vub**2 + Vus**2))*cos(gamma)))
         ]
 
     @staticmethod
@@ -199,14 +199,14 @@ class CKMSchemeRmuBtaunuBxlnuDeltaM(CKMScheme):
             sqrt(f1 - f1 * f3) / sqrt(1 + f1),  # Vus
             sqrt(f2),  # Vcb
             sqrt(f3),  # Vub
-            # delta
+            # gamma
             acos(-((-1 + f3)*(f3 - f3*(f2 + f3) - f2*f4 + f1*(f2 + f3*(-1 + f2 + f3)*f4)))/
             (2.*sqrt(1 + f1)*sqrt(f2)*sqrt(f3)*sqrt(f1 - f1*f3)*
             ((((-1 + f3)**2*(-1 + f2 + f3)**2)/(1 + f1)**2)**0.25 + sqrt(((-1 + f3)*(-1 + f2 + f3))/(1 + f1))*f4)))
         ]
 
     @staticmethod
-    def jacobian(Vus, Vcb, Vub, delta):
+    def jacobian(Vus, Vcb, Vub, gamma):
         """Return the Jacobian of the transformation from the four CKM
         parameters to the four CKM prefactors."""
         J = np.zeros((4, 4))
@@ -215,24 +215,24 @@ class CKMSchemeRmuBtaunuBxlnuDeltaM(CKMScheme):
         J[1, 1] = 2 * Vcb
         J[2, 2] = 2 * Vub
         J[3, 0] = ((2*(-1 + Vub**2)**2*(Vcb**2 + Vub**2)*((Vcb**2 + (-1 + Vcb**2)*Vub**2 + Vub**4)*Vus*
-            sqrt((-1 + Vcb**2 + Vub**2)*(-1 + Vub**2 + Vus**2)) - Vcb*Vub*(-1 + Vcb**2 + Vub**2)*(-1 + Vub**2 + 2*Vus**2)*cos(delta))
+            sqrt((-1 + Vcb**2 + Vub**2)*(-1 + Vub**2 + Vus**2)) - Vcb*Vub*(-1 + Vcb**2 + Vub**2)*(-1 + Vub**2 + 2*Vus**2)*cos(gamma))
             )/(sqrt((-1 + Vcb**2 + Vub**2)*(-1 + Vub**2 + Vus**2))*
             (Vcb**2*(-1 + Vub**2) + (Vcb**2 + (-1 + Vcb**2)*Vub**2 + Vub**4)*Vus**2 -
-            2*Vcb*Vub*Vus*sqrt((-1 + Vcb**2 + Vub**2)*(-1 + Vub**2 + Vus**2))*cos(delta))**2))
+            2*Vcb*Vub*Vus*sqrt((-1 + Vcb**2 + Vub**2)*(-1 + Vub**2 + Vus**2))*cos(gamma))**2))
         J[3, 1] = ((2*Vub*(-1 + Vub**2)**2*(Vcb*Vub*(-1 + Vcb**2 + Vub**2)*(-1 + Vub**2 + 2*Vus**2) -
-            (Vcb**2 + (-1 + Vcb**2)*Vub**2 + Vub**4)*Vus*sqrt((-1 + Vcb**2 + Vub**2)*(-1 + Vub**2 + Vus**2))*cos(delta)))/
+            (Vcb**2 + (-1 + Vcb**2)*Vub**2 + Vub**4)*Vus*sqrt((-1 + Vcb**2 + Vub**2)*(-1 + Vub**2 + Vus**2))*cos(gamma)))/
             ((-1 + Vcb**2 + Vub**2)*(Vcb**2*(-1 + Vub**2) + (Vcb**2 + (-1 + Vcb**2)*Vub**2 + Vub**4)*Vus**2 -
-            2*Vcb*Vub*Vus*sqrt((-1 + Vcb**2 + Vub**2)*(-1 + Vub**2 + Vus**2))*cos(delta))**2))
+            2*Vcb*Vub*Vus*sqrt((-1 + Vcb**2 + Vub**2)*(-1 + Vub**2 + Vus**2))*cos(gamma))**2))
         J[3, 2] = ((2*(-1 + Vub**2)*(-(Vub*sqrt((-1 + Vcb**2 + Vub**2)*(-1 + Vub**2 + Vus**2))*
             (Vcb**2*(-1 + Vub**2)*(-1 + Vcb**2 + 2*Vub**2) +
             (-Vub**4 + Vub**6 + Vcb**4*(3 + Vub**2) + 2*Vcb**2*(-1 + 2*Vub**2 + Vub**4))*Vus**2)) +
             Vcb*Vus*(Vcb**2*(1 - 6*Vub**4 + 5*Vub**6 + (-1 - 2*Vub**2 + 7*Vub**4)*Vus**2) +
             Vub**2*(-1 + Vub**2)*(1 + 3*Vub**4 - Vus**2 + 4*Vub**2*(-1 + Vus**2)) +
-            Vcb**4*(-1 + 2*Vub**4 + Vus**2 + Vub**2*(-1 + 3*Vus**2)))*cos(delta)))/
+            Vcb**4*(-1 + 2*Vub**4 + Vus**2 + Vub**2*(-1 + 3*Vus**2)))*cos(gamma)))/
             (sqrt((-1 + Vcb**2 + Vub**2)*(-1 + Vub**2 + Vus**2))*
             (Vcb**2*(-1 + Vub**2) + (Vcb**2 + (-1 + Vcb**2)*Vub**2 + Vub**4)*Vus**2 -
-            2*Vcb*Vub*Vus*sqrt((-1 + Vcb**2 + Vub**2)*(-1 + Vub**2 + Vus**2))*cos(delta))**2))
-        J[3, 3] = ((2*Vcb*Vub*(-1 + Vub**2)**2*(Vcb**2 + Vub**2)*Vus*sqrt((-1 + Vcb**2 + Vub**2)*(-1 + Vub**2 + Vus**2))*sin(delta))/
+            2*Vcb*Vub*Vus*sqrt((-1 + Vcb**2 + Vub**2)*(-1 + Vub**2 + Vus**2))*cos(gamma))**2))
+        J[3, 3] = ((2*Vcb*Vub*(-1 + Vub**2)**2*(Vcb**2 + Vub**2)*Vus*sqrt((-1 + Vcb**2 + Vub**2)*(-1 + Vub**2 + Vus**2))*sin(gamma))/
             (Vcb**2*(-1 + Vub**2) + (Vcb**2 + (-1 + Vcb**2)*Vub**2 + Vub**4)*Vus**2 -
-            2*Vcb*Vub*Vus*sqrt((-1 + Vcb**2 + Vub**2)*(-1 + Vub**2 + Vus**2))*cos(delta))**2)
+            2*Vcb*Vub*Vus*sqrt((-1 + Vcb**2 + Vub**2)*(-1 + Vub**2 + Vus**2))*cos(gamma))**2)
         return J

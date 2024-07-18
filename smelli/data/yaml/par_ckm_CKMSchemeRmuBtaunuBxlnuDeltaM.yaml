@@ -1,4 +1,4 @@
-- parameters: [Vus, Vcb, Vub, delta]
+- parameters: [Vus, Vcb, Vub, gamma]
   values:
     central_value: [0.22530319291042578, 0.04206908963004567, 0.004149925036750691,
       1.0886497044558188]

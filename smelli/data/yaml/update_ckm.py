@@ -17,7 +17,7 @@ def save_ckm(scheme,file_path,N=10000):
           "Vus",
           "Vcb",
           "Vub",
-          "delta"
+          "gamma"
         ],
         "values": {
           "distribution": "multivariate_normal",
