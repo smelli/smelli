@@ -1030,7 +1030,7 @@ class GlobalLikelihoodPoint(object):
             del(df['exp. PDF'])
             del(df['ll_central'])
             del(df['ll_sm'])
-        return df
+        return df.astype(float)
 
     @staticmethod
     def _obstable_filter_sort(info, sortkey='name', ascending=True,
