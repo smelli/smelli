@@ -8,7 +8,7 @@ import pandas as pd
 import numpy as np
 from collections import OrderedDict
 from math import ceil
-from .util import tree, multithreading_map, as_float
+from .util import tree, get_datapath, multithreading_map, as_float
 from .ckm import get_ckm_schemes
 from multipledispatch import dispatch
 from copy import copy
@@ -20,7 +20,6 @@ import inspect
 from flavio.math.optimize import minimize_robust
 from smelli import _flavio_up_to_date
 from itertools import chain
-from flavio.util import get_datapath
 
 
 # by default, smelli uses leading log accuracy for SMEFT running!

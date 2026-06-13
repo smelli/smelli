@@ -1,4 +1,4 @@
-import importlib.resources
+from flavio.util import get_datapath
 from collections import defaultdict
 import multiprocessing
 # Use explicit 'fork' context for compatibility with Python 3.14+
