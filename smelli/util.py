@@ -1,6 +1,9 @@
 import importlib.resources
 from collections import defaultdict
-from multiprocessing import Pool
+import multiprocessing
+# Use explicit 'fork' context for compatibility with Python 3.14+
+# where the default start method changed to 'forkserver'
+Pool = multiprocessing.get_context('fork').Pool
 import numpy as np
 
 
