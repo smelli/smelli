@@ -15,10 +15,6 @@ def tree():
     return defaultdict(tree)
 
 
-def get_datapath(package, resource):
-    """Return the file path for a resource within a package."""
-    return str(importlib.resources.files(package).joinpath(resource))
-
 def multithreading_map(func, iterable, threads=1, pool=None):
     if threads > 1 or pool is not None:
         if pool is None:

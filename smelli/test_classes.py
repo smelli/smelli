@@ -1,6 +1,6 @@
 import unittest
 from .classes import *
-
+from flavio.util import get_datapath
 
 class TestGlobalLikelihood(unittest.TestCase):
 
