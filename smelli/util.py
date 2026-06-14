@@ -1,8 +1,9 @@
-import pkgutil
-import os
-import sys
+from flavio.util import get_datapath
 from collections import defaultdict
-from multiprocessing import Pool
+import multiprocessing
+# Use explicit 'fork' context for compatibility with Python 3.14+
+# where the default start method changed to 'forkserver'
+Pool = multiprocessing.get_context('fork').Pool
 import numpy as np
 
 
@@ -13,24 +14,6 @@ def tree():
     """
     return defaultdict(tree)
 
-
-def get_datapath(package, resource):
-    """Rewrite of pkgutil.get_data() that just returns the file path.
-
-    Taken from https://stackoverflow.com/a/13773912"""
-    loader = pkgutil.get_loader(package)
-    if loader is None or not hasattr(loader, 'get_data'):
-        return None
-    mod = sys.modules.get(package) or loader.load_module(package)
-    if mod is None or not hasattr(mod, '__file__'):
-        return None
-    # Modify the resource name to be compatible with the loader.get_data
-    # signature - an os.path format "filename" starting with the dirname of
-    # the package's __file__
-    parts = resource.split('/')
-    parts.insert(0, os.path.dirname(mod.__file__))
-    resource_name = os.path.join(*parts)
-    return resource_name
 
 def multithreading_map(func, iterable, threads=1, pool=None):
     if threads > 1 or pool is not None:
