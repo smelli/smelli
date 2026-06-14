@@ -8,7 +8,7 @@ import pandas as pd
 import numpy as np
 from collections import OrderedDict
 from math import ceil
-from .util import tree, get_datapath, multithreading_map
+from .util import tree, get_datapath, multithreading_map, as_float
 from .ckm import get_ckm_schemes
 from multipledispatch import dispatch
 from copy import copy
@@ -382,8 +382,8 @@ class GlobalLikelihood(object):
                     info[obs]['exp. unc.'] = np.sqrt(exp_cov[i, i])
                     info[obs]['exp. PDF'] = NormalDistribution(m.get_central(obs), np.sqrt(exp_cov[i, i]))
                     info[obs]['inspire'] = sorted(set(inspire_dict[obs]))
-                    info[obs]['ll_sm'] = m.get_logprobability_single(obs, pred_sm[obs])
-                    info[obs]['ll_central'] = m.get_logprobability_single(obs, m.get_central(obs))
+                    info[obs]['ll_sm'] = as_float(m.get_logprobability_single(obs, pred_sm[obs]))
+                    info[obs]['ll_central'] = as_float(m.get_logprobability_single(obs, m.get_central(obs)))
             for lh_name, lh in self.likelihoods.items():
                 # loop over "normal" likelihoods
                 ml = lh.measurement_likelihood
@@ -406,10 +406,10 @@ class GlobalLikelihood(object):
                     info[obs]['th. unc.'] = 0
                     info[obs]['lh_name'] = lh_name
                     info[obs]['name'] = obs if isinstance(obs, str) else obs[0]
-                    info[obs]['ll_sm'] = p_comb.logpdf([pred_sm[obs]])
+                    info[obs]['ll_sm'] = as_float(p_comb.logpdf([pred_sm[obs]]))
                     if info[obs]['ll_sm'] == -np.inf:
                         info[obs]['ll_sm'] = -1e100
-                    info[obs]['ll_central'] = p_comb.logpdf([p_comb.central_value])
+                    info[obs]['ll_central'] = as_float(p_comb.logpdf([p_comb.central_value]))
             self._obstable_sm = info
         return self._obstable_sm
 
@@ -958,7 +958,7 @@ class GlobalLikelihoodPoint(object):
                     info[obs]['theory'] = pred[obs]
                     ll_central = info[obs]['ll_central']
                     ll_sm = info[obs]['ll_sm']
-                    ll = m.get_logprobability_single(obs, pred[obs])
+                    ll = as_float(m.get_logprobability_single(obs, pred[obs]))
                     # DeltaChi2 is -2*DeltaLogLikelihood
                     info[obs]['pull exp.'] = pull(-2 * (ll - ll_central), dof=1)
                     s = -1 if ll > ll_sm else 1
@@ -972,7 +972,7 @@ class GlobalLikelihoodPoint(object):
                     ll_central = info[obs]['ll_central']
                     ll_sm = info[obs]['ll_sm']
                     p_comb = info[obs]['exp. PDF']
-                    ll = p_comb.logpdf([pred[obs]])
+                    ll = as_float(p_comb.logpdf([pred[obs]]))
                     if ll == -np.inf:
                         ll = -1e100
                     info[obs]['pull exp.'] = pull(-2 * (ll - ll_central), dof=1)
