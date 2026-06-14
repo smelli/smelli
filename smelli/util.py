@@ -3,6 +3,7 @@ import os
 import sys
 from collections import defaultdict
 from multiprocessing import Pool
+import numpy as np
 
 
 def tree():
@@ -48,3 +49,8 @@ def multithreading_map(func, iterable, threads=1, pool=None):
     else:
         result = map(func, iterable)
     return result
+
+
+def as_float(x):
+    """Convert a number or a size-1 array to a plain float."""
+    return float(np.asarray(x).item())
