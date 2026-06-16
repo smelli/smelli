@@ -907,7 +907,7 @@ class GlobalLikelihoodPoint(object):
         """Compute the delta log likelihood for the individual likelihoods"""
         ll = self.likelihood._log_likelihood(self.par_dict_np, self.w)
         for name in ll:
-            ll[name] -= self.likelihood.log_likelihood_sm[name]
+            ll[name] = float(ll[name] - self.likelihood.log_likelihood_sm[name])
         ll['global'] = sum([v for k, v in ll.items() if 'custom_' not in k])
         return ll
 
@@ -932,7 +932,7 @@ class GlobalLikelihoodPoint(object):
         of free parameters (default 0)."""
         nobs = self.likelihood.number_observations_dict()
         chi2 = self.chi2_dict()
-        return {k: pvalue(chi2[k], dof=max(1, nobs[k] - n_par)) for k in chi2}
+        return {k: float(pvalue(chi2[k], dof=max(1, nobs[k] - n_par))) for k in chi2}
 
     def chi2_dict(self):
         r"""Dictionary of total $\chi^2$ values of each sublikelihood.
@@ -942,7 +942,7 @@ class GlobalLikelihoodPoint(object):
         ll = self.log_likelihood_dict()
         llsm = self.likelihood._log_likelihood_sm.copy()
         llsm['global'] = sum([v for k, v in llsm.items() if 'custom_' not in k])
-        return {k: -2 * (ll[k] + llsm[k]) for k in ll}
+        return {k: float(-2 * (ll[k] + llsm[k])) for k in ll}
 
     @property
     def _obstable_tree(self):
