@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout git repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v6
         with:
           submodules: true
           path: _src/
@@ -46,7 +46,7 @@ jobs:
           popd
 
       - name: Upload build as artifact
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v7
         with:
           name: smelli-dist-${{ github.sha }}
           path: dist
