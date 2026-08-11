@@ -905,7 +905,20 @@ class GlobalLikelihoodPoint(object):
 
     def _delta_log_likelihood(self):
         """Compute the delta log likelihood for the individual likelihoods"""
-        ll = self.likelihood._log_likelihood(self.par_dict_np, self.w)
+        try:
+            ll = self.likelihood._log_likelihood(self.par_dict_np, self.w)
+        except ValueError as e:
+            if (
+                'The extraction of CKM elements failed.' in str(e)
+                or
+                'math domain error' in str(e)
+            ):
+                warnings.warn("The extraction of CKM elements failed. Too large NP effects? Setting log-likelihood to negative infinity.")
+                ll = {}
+                for name in self.likelihood.log_likelihood_sm:
+                    ll[name] = -np.inf
+            else:
+                raise
         for name in ll:
             ll[name] = float(ll[name] - self.likelihood.log_likelihood_sm[name])
         ll['global'] = sum([v for k, v in ll.items() if 'custom_' not in k])
